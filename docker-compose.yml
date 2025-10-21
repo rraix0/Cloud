@@ -3,8 +3,6 @@ services:
   frontend:
     build: ./frontend
     restart: always
-    networks:
-      - sso-net
     environment:
       - VITE_HOST=http://localhost:8000/api
     ports:
@@ -28,8 +26,6 @@ services:
       - SURREAL_PASSWORD=bot123
     depends_on:
       - frontend
-    networks:
-      - sso-net
     ports:
       - "8000:8000"
     networks:
