@@ -4,7 +4,7 @@ services:
     build: ./frontend
     restart: always
     environment:
-      - VITE_HOST=http://localhost:8000/api
+      - VITE_HOST=${VITE_HOST}
     ports:
       - "82:80"
     networks:
@@ -13,17 +13,17 @@ services:
     build: ./backend
     restart: always
     environment:
-      - ROCKET_ADDRESS=0.0.0.0
-      - ROCKET_PORT=8000
-      - AWS_REGION=eu-central-1
-      - AWS_ENDPOINT_URL=http://192.168.0.10:9000
-      - AWS_ACCESS_KEY_ID=cloud
-      - AWS_SECRET_ACCESS_KEY=9NJfTCQ4V7Y3LNRQ
-      - AWS_BUCKET=cloud
-      - SURREAL_NAMESPACE=Cloud
-      - SURREAL_DATABASE=Cloud
-      - SURREAL_USERNAME=bot
-      - SURREAL_PASSWORD=bot123
+      - ROCKET_ADDRESS=${ROCKET_ADDRESS}
+      - ROCKET_PORT=${ROCKET_PORT}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_BUCKET=${AWS_BUCKET}
+      - SURREAL_NAMESPACE=${SURREAL_NAMESPACE}
+      - SURREAL_DATABASE=${SURREAL_DATABASE}
+      - SURREAL_USERNAME=${SURREAL_USERNAME}
+      - SURREAL_PASSWORD=${SURREAL_PASSWORD}
     depends_on:
       - frontend
     ports:
