@@ -2,11 +2,11 @@ FROM rust:bullseye as builder
 
 WORKDIR /usr/src/app
 COPY . .
-RUN cargo build --release
+RUN cargo build
 
 FROM debian:bullseye
 WORKDIR /usr/src/app
-COPY --from=builder /usr/src/app/target/release/backend /usr/local/bin/app
+COPY --from=builder /usr/src/app/target/debug/backend /usr/local/bin/app
 COPY --from=builder /usr/src/app/Rocket.toml .
 EXPOSE 8000
 

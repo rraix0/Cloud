@@ -6,7 +6,7 @@ services:
     environment:
       - VITE_HOST=http://localhost:8000/api
     ports:
-      - "80:80"
+      - "82:80"
     networks:
       - dokploy-network
   backend:
