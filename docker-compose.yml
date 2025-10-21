@@ -9,6 +9,8 @@ services:
       - VITE_HOST=http://localhost:8000/api
     ports:
       - "80:80"
+    networks:
+      - dokploy-network
   backend:
     build: ./backend
     restart: always
@@ -30,7 +32,10 @@ services:
       - sso-net
     ports:
       - "8000:8000"
+    networks:
+      - dokploy-network
 
 networks:
-  sso-net:
-    driver: bridge
+  dokploy-network:
+    external: true
+
