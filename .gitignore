@@ -1,0 +1,15 @@
+# Rust backend
+/backend/target/
+/backend/**/*.rlib
+/backend/**/*.rmeta
+
+# Node.js frontend
+/frontend/node_modules/
+/frontend/dist/
+/frontend/build/
+
+# IDE i systemowe
+.vscode/
+.idea/
+*.swp
+*.DS_Store

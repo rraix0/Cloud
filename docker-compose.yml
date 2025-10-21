@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  frontend:
+    build: ./frontend
+    restart: always
+    networks:
+      - sso-net
+    environment:
+      - VITE_HOST=http://localhost:8000/api
+    ports:
+      - "80:80"
+  backend:
+    build: ./backend
+    restart: always
+    environment:
+      - ROCKET_ADDRESS=0.0.0.0
+      - ROCKET_PORT=8000
+      - AWS_REGION=eu-central-1
+      - AWS_ENDPOINT_URL=http://192.168.0.10:9000
+      - AWS_ACCESS_KEY_ID=cloud
+      - AWS_SECRET_ACCESS_KEY=9NJfTCQ4V7Y3LNRQ
+      - AWS_BUCKET=cloud
+      - SURREAL_NAMESPACE=Cloud
+      - SURREAL_DATABASE=Cloud
+      - SURREAL_USERNAME=bot
+      - SURREAL_PASSWORD=bot123
+    depends_on:
+      - frontend
+    networks:
+      - sso-net
+    ports:
+      - "8000:8000"
+
+networks:
+  sso-net:
+    driver: bridge

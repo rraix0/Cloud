@@ -1,0 +1,30 @@
+[default]
+address = "0.0.0.0"
+port = 8000
+log = "normal"
+
+[development]
+address = "0.0.0.0"
+port = 8000
+log = "debug"
+
+[production]
+address = "0.0.0.0"
+port = 8000
+log = "critical"
+
+
+[default.limits]
+form = "20 MiB"
+data-form = "20 MiB"
+file = "17 MiB"
+
+[production.limits]
+form = "20 MiB"
+data-form = "20 MiB"
+file = "17 MiB"
+
+[development.limits]
+form = "20 MiB"
+data-form = "20 MiB"
+file = "17 MiB"
