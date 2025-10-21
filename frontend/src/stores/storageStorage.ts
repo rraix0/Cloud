@@ -82,7 +82,7 @@ export const useStorageStorage = defineStore('storage', () => {
   ]);
 
   const getRootFolder = () => {
-    axios.post(import.meta.env.VITE_HOST + "/storage/get_folders", { //TODO change struct of folder to correct arguments
+    axios.post(import.meta.env.VITE_API_URL + "/storage/get_folders", { //TODO change struct of folder to correct arguments
       authorization: {
         "user_id": localStorage.getItem('user_id'),
         "jwt": localStorage.getItem('jwt')

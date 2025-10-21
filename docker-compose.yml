@@ -1,14 +1,17 @@
 version: "3.9"
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=${VITE_API_URL}
     restart: always
-    environment:
-      - VITE_HOST=${VITE_HOST}
     ports:
       - "82:80"
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
     networks:
-      - sso-net
+      - dokploy-network
   backend:
     build: ./backend
     restart: always
@@ -30,9 +33,8 @@ services:
     ports:
       - "8090:8000"
     networks:
-      - sso-net
+      - dokploy-network
 
 networks:
-  sso-net:
-    driver: bridge
-
+  dokploy-network:
+    external: true

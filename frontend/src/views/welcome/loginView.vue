@@ -13,8 +13,10 @@ const email = ref('')
 const password = ref('')
 const err_info = ref('')
 
+console.log("ENV: " + import.meta.env.VITE_API_URL + " END")
+
 const handleLogin = () => {
-  axios.post(import.meta.env.VITE_HOST + "/users/login", {
+  axios.post(import.meta.env.VITE_API_URL + "/users/login", {
     email: email.value,
     password: password.value,
   })

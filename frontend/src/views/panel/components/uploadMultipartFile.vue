@@ -65,7 +65,7 @@ export default defineComponent({
         formData1.append('authorization.user_id', authorization_user_id)
         formData1.append('authorization.jwt', authorization_jwt)
         const initResponse = await axios.post(
-          import.meta.env.VITE_HOST + '/storage/create_multipart_upload',
+          import.meta.env.VITE_API_URL + '/storage/create_multipart_upload',
           formData1,
           {
             headers: { 'Content-Type': 'multipart/form-data' },
@@ -86,7 +86,7 @@ export default defineComponent({
           formData2.append('part_number', (i + 1).toString())
           formData2.append('upload_id', uploadId)
 
-          await axios.post(import.meta.env.VITE_HOST + '/storage/multipart_upload', formData2, {
+          await axios.post(import.meta.env.VITE_API_URL + '/storage/multipart_upload', formData2, {
             headers: { 'Content-Type': 'multipart/form-data' },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total) {
@@ -103,7 +103,7 @@ export default defineComponent({
         formData3.append('upload_id', uploadId)
         formData3.append('authorization.user_id', authorization_user_id)
         formData3.append('authorization.jwt', authorization_jwt)
-        await axios.post(import.meta.env.VITE_HOST + '/storage/complete_multipart_upload', formData3, {
+        await axios.post(import.meta.env.VITE_API_URL + '/storage/complete_multipart_upload', formData3, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
 

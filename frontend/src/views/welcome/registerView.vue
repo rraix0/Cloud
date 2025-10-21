@@ -22,7 +22,7 @@ const handleRegister = () => {
     err_info.value = "Password doesn't match"
     return
   }
-  axios.post(import.meta.env.HOST + '/users/register', {
+  axios.post(import.meta.env.VITE_API_URL + '/users/register', {
     ticket: ticket.value,
     email: email.value,
     name: name.value,
