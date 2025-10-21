@@ -404,28 +404,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aws-sdk-config"
-version = "1.91.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7e28d134bf69173fe4d5e69360d2ae5e2dde826d575a4c62f18a4ef2feac5fd"
-dependencies = [
- "aws-credential-types",
- "aws-runtime",
- "aws-smithy-async",
- "aws-smithy-http",
- "aws-smithy-json",
- "aws-smithy-runtime",
- "aws-smithy-runtime-api",
- "aws-smithy-types",
- "aws-types",
- "bytes",
- "fastrand",
- "http 0.2.12",
- "regex-lite",
- "tracing",
-]
-
-[[package]]
 name = "aws-sdk-s3"
 version = "1.108.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -770,19 +748,14 @@ name = "backend"
 version = "0.1.0"
 dependencies = [
  "aws-config",
- "aws-sdk-config",
  "aws-sdk-s3",
  "bytes",
  "dotenvy",
- "futures",
- "multer",
  "rocket",
  "rocket_cors",
  "serde",
  "surrealdb",
  "tokio",
- "tokio-stream",
- "tokio-util",
  "uuid",
 ]
 

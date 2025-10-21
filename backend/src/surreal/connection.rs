@@ -10,7 +10,7 @@ pub async fn get_connection() -> Surreal<Any> {
     let db: Surreal<Any>;
 
     loop {
-        match any::connect("ws://192.168.0.10:8000/rpc").await {
+        match any::connect(env::var("SURREAL_HOST").unwrap().as_str()).await {
             Ok(client) => {
                 db = client;
                 break;

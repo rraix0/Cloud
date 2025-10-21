@@ -12,10 +12,5 @@ uuid = { version = "1.16.0", features = ["v7"] }
 dotenvy = "0.15.7"
 aws-config = "1.8.8"
 tokio = { version = "1.47.1", features = ["full"] }
-aws-sdk-config = "1.90.0"
 aws-sdk-s3 = "1.108.0"
-tokio-util = "0.7.16"
 bytes = "1.10.1"
-tokio-stream = "0.1.17"
-multer = "3.1.0"
-futures = "0.3.31"

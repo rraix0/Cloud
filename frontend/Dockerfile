@@ -10,5 +10,4 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
 ENV VITE_BASE_URL=/
-ENV VITE_HOST="http://localhost:8000/api"
 CMD ["nginx", "-g", "daemon off;"]

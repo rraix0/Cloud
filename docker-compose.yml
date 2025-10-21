@@ -8,7 +8,7 @@ services:
     ports:
       - "82:80"
     networks:
-      - dokploy-network
+      - sso-net
   backend:
     build: ./backend
     restart: always
@@ -20,6 +20,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_BUCKET=${AWS_BUCKET}
+      - SURREAL_HOST=${SURREAL_HOST}
       - SURREAL_NAMESPACE=${SURREAL_NAMESPACE}
       - SURREAL_DATABASE=${SURREAL_DATABASE}
       - SURREAL_USERNAME=${SURREAL_USERNAME}
@@ -27,11 +28,11 @@ services:
     depends_on:
       - frontend
     ports:
-      - "8000:8000"
+      - "8090:8000"
     networks:
-      - dokploy-network
+      - sso-net
 
 networks:
-  dokploy-network:
-    external: true
+  sso-net:
+    driver: bridge
 
