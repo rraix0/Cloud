@@ -1,7 +1,6 @@
 use rocket::serde::{Deserialize, Serialize};
 use surrealdb::Datetime;
 use surrealdb::sql::{Object, Thing};
-use crate::types::auth_type::Authorization;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct ObjectType {
@@ -19,7 +18,6 @@ pub struct ObjectType {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct UploadObject {
-    pub authorization: Authorization,
     pub name: String,
     pub length: i64,
 }

@@ -1,11 +1,14 @@
+use std::env;
 use std::sync::Arc;
+use chrono::{Duration, Utc};
+use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use rocket::http::Status;
 use rocket::{post, State};
 use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
 use uuid::{Uuid};
-use crate::types::auth_type::Authorization;
+use crate::types::auth_type::Claims;
 use crate::types::users::{
     register_type::UserRegisterRequest,
     ticket::Ticket,
@@ -16,7 +19,7 @@ use crate::types::users::{
 pub async fn register(
     account: Json<UserRegisterRequest>,
     db: &State<Arc<Surreal<Any>>>
-) -> Result<(Status, Json<Authorization>), (Status, &'static str)> {
+) -> Result<(Status, Json<String>), (Status, &'static str)> {
 
 
     let mut ticket_response = db
@@ -104,15 +107,27 @@ pub async fn register(
     });
 
 
-    match created_user.take() {
+    let user_id = match created_user.take() {
         Some(result) => {
-            Ok((Status::Ok, Json(Authorization {
-                user_id: result.get_id(),
-                jwt: result.jwt.clone(),
-            })))
+            result.get_id()
         }
         None => {
-            Err((Status::InternalServerError, "Couldn't parse user"))
+           return Err((Status::InternalServerError, "Couldn't parse user"));
+        }
+    };
+
+    let claims: Claims = Claims{
+        exp: (Utc::now() + Duration::hours(24)).timestamp() as usize,
+        sub: user_id
+    };
+
+    let token = encode(&Header::new(Algorithm::default()), &claims, &EncodingKey::from_secret(env::var("JWT_SECRET").unwrap().as_bytes()));
+    match token {
+        Ok(token) => {
+            Ok((Status::Ok, Json(token)))
+        }
+        Err(_) => {
+            Err((Status::InternalServerError, "Server error"))
         }
     }
 

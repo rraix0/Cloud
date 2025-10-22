@@ -1,9 +1,7 @@
 use std::sync::Arc;
 use aws_sdk_s3::Client;
-use bytes::BufMut;
 use rocket::{routes, launch};
 use dotenvy::dotenv;
-use rocket::data::ToByteUnit;
 use rocket::http::Method;
 use rocket_cors::{AllowedOrigins, CorsOptions};
 use surrealdb::engine::any::Any;
@@ -13,6 +11,7 @@ mod routes;
 mod types;
 mod surreal;
 mod minio;
+mod guards;
 
 use crate::{
     routes::{

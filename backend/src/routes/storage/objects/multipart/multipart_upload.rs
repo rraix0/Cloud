@@ -10,24 +10,22 @@ use surrealdb::{Surreal, engine::any::Any};
 use tokio::time::sleep;
 use crate::routes::storage::objects::multipart::part_info_storage::{PartInfoHashMap, PartInfoStorage, PartInfoStorageData};
 use crate::STORAGE;
-use crate::surreal::authorization::handle_authorization;
-use crate::types::auth_type::Authorization;
+use crate::types::auth_type::{AuthToken};
 
 #[derive(FromForm)]
 pub struct UploadPart<'a> {
     file: TempFile<'a>,
     part_number: i32,
     upload_id: String,
-    authorization: Authorization,
 }
 
 #[post("/storage/multipart_upload", data = "<form>")]
 pub async fn multipart_upload<'a>(
-    db: &State<Arc<Surreal<Any>>>,
+    _db: &State<Arc<Surreal<Any>>>,
     client: &State<Arc<Client>>,
     form: Form<UploadPart<'a>>,
+    auth_token: AuthToken,
 ) -> Result<(Status, Json<String>), (Status, &'static str)> {
-    handle_authorization(db, form.authorization.clone()).await?;
 
     let byte_stream = ByteStream::from_path(form.file.path().unwrap()).await.map_err(|err| {
         println!("{:?}, {:?}", form.file.path(), err);
@@ -36,7 +34,7 @@ pub async fn multipart_upload<'a>(
 
     let key:String = {
         let storage: MutexGuard<PartInfoHashMap> = STORAGE.lock().map_err(|_| (Status::InternalServerError, "Error while collecting file parts"))?;
-        let value = match storage.get(&(form.authorization.user_id.clone(), form.upload_id.clone())) {
+        let value = match storage.get(&(auth_token.0.sub.clone(), form.upload_id.clone())) {
             Some(storage) => storage.data.key.clone(),
             None => {
                 return Err((Status::InternalServerError, "Error while collecting file part"));
@@ -60,7 +58,7 @@ pub async fn multipart_upload<'a>(
 
     let mut storage: MutexGuard<PartInfoHashMap> = STORAGE.lock().map_err(|_| (Status::InternalServerError, "Error while collecting file parts"))?;
 
-    let part_info_storage: PartInfoStorage = match storage.get(&(form.authorization.user_id.clone(), form.upload_id.clone())) {
+    let part_info_storage: PartInfoStorage = match storage.get(&(auth_token.0.sub.clone(), form.upload_id.clone())) {
         None => {
             return Err((Status::InternalServerError, "Couldn't find part parts"));
         }
@@ -70,12 +68,12 @@ pub async fn multipart_upload<'a>(
             let client_clone = Arc::clone(client.inner());
             let key_clone = key.clone();
             let upload_id_clone = form.upload_id.clone();
-            let user_id_clone = form.authorization.user_id.clone();
+            let user_id_clone = auth_token.0.sub.clone();
 
             let infos: PartInfoStorage = match &item.data.completed_multipart_upload.parts {
                 None => {
                     let upload_id_clone = form.upload_id.clone();
-                    let user_id_clone = form.authorization.user_id.clone();
+                    let user_id_clone = auth_token.0.sub.clone();
                     let x:PartInfoStorage = PartInfoStorage {
                         data: PartInfoStorageData {
                             completed_multipart_upload: CompletedMultipartUpload::builder().parts(part).build(),
@@ -127,12 +125,12 @@ pub async fn multipart_upload<'a>(
                     }
                 },
             };
-            storage.remove(&(form.authorization.user_id.clone(), form.upload_id.clone()));
+            storage.remove(&(auth_token.0.sub.clone(), form.upload_id.clone()));
             infos
         }
     };
 
-    storage.insert((form.authorization.user_id.clone(), form.upload_id.clone()), part_info_storage);
+    storage.insert((auth_token.0.sub.clone(), form.upload_id.clone()), part_info_storage);
 
     Ok((Status::Ok, Json(format!("Uploaded {}", key.to_string()))))
 }

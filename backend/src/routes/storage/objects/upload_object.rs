@@ -6,23 +6,21 @@ use rocket::fs::TempFile;
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use surrealdb::{Surreal, engine::any::Any};
-use crate::surreal::authorization::handle_authorization;
-use crate::types::auth_type::Authorization;
+use crate::types::auth_type::{AuthToken};
 
 #[derive(FromForm)]
 pub struct UploadObject<'a> {
     file: TempFile<'a>,
     title: String,
-    authorization: Authorization,
 }
 
 #[post("/storage/upload_object", data = "<form>")]
 pub async fn upload_object<'a>(
-    db: &State<Arc<Surreal<Any>>>,
+    _db: &State<Arc<Surreal<Any>>>,
     client: &State<Arc<Client>>,
     form: Form<UploadObject<'a>>,
+    _auth_token: AuthToken,
 ) -> Result<(Status, Json<String>), (Status, &'static str)> {
-    handle_authorization(db, form.authorization.clone()).await?;
 
     println!("{:?}, {:?}", form.file.name(), form.file.content_type());
     println!("{:?}", form.file.path().clone());

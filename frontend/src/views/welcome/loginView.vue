@@ -15,15 +15,17 @@ const err_info = ref('')
 
 console.log("ENV: " + import.meta.env.VITE_API_URL + " END")
 
+if (localStorage.getItem('jwt')) {
+  router.push('/panel/storage')
+}
+
 const handleLogin = () => {
   axios.post(import.meta.env.VITE_API_URL + "/users/login", {
     email: email.value,
     password: password.value,
   })
     .then(function (response) {
-      localStorage.setItem('authorization', response.data)
-      localStorage.setItem('user_id', response.data.user_id)
-      localStorage.setItem('jwt', response.data.jwt)
+      localStorage.setItem('jwt', response.data)
       router.push('/panel/storage')
     })
     .catch(function (error) {

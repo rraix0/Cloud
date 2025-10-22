@@ -1,11 +1,11 @@
+
+/*
 use std::sync::Arc;
 use rocket::{State};
 use rocket::http::Status;
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
-use crate::types::auth_type::Authorization;
 use crate::types::users::user::User;
-
 pub async fn authorize(
     db: &State<Arc<Surreal<Any>>>,
     data: Authorization
@@ -55,3 +55,6 @@ pub async fn handle_authorization(
         }
     }
 }
+
+
+ */

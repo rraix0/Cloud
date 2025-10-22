@@ -8,23 +8,22 @@ use rocket::http::Status;
 use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
-use crate::surreal::authorization::handle_authorization;
+use crate::types::auth_type::AuthToken;
 use crate::types::storage::object::UploadObject;
 
 #[post("/storage/upload_objects_uri", data = "<data>")]
 pub async fn upload_objects_uri(
     db: &State<Arc<Surreal<Any>>>,
     client: &State<Arc<Client>>,
-    data: Json<UploadObject>
+    data: Json<UploadObject>,
+    auth_token: AuthToken,
 ) -> Result<(Status, Json<String>), (Status, &'static str)> {
-
-    handle_authorization(db, data.authorization.clone()).await?;
 
 
     let resp = client
         .put_object()
         .bucket(env::var("AWS_BUCKET").unwrap())
-        .key(format!("{}/{}", data.authorization.user_id.clone(), data.name.clone()))
+        .key(format!("{}/{}", auth_token.0.sub.clone(), data.name.clone()))
         .content_length(data.length.clone()) // set size fx. 50833
         .presigned(
             PresigningConfig::builder()
@@ -32,14 +31,8 @@ pub async fn upload_objects_uri(
             .build().unwrap()
         )
         .await.unwrap();
-
-    
-
     println!("{:?}", resp);
 
-
     Ok((Status::Ok, Json(format!("{:?}", resp.uri()))))
-
-
 }
 

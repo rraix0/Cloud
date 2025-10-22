@@ -14,28 +14,25 @@ use tokio::time::sleep;
 use uuid::Uuid;
 use crate::routes::storage::objects::multipart::part_info_storage::{PartInfoHashMap, PartInfoStorage, PartInfoStorageData};
 use crate::STORAGE;
-use crate::surreal::authorization::handle_authorization;
-use crate::types::auth_type::Authorization;
+use crate::types::auth_type::{AuthToken};
 
 #[derive(FromForm)]
 pub struct CreateMultipartUpload {
     title: String,
-    authorization: Authorization,
     folder: Json<Thing>,
     size: u64,
 }
 
 #[post("/storage/create_multipart_upload", data = "<form>")]
 pub async fn create_multipart_upload(
-    db: &State<Arc<Surreal<Any>>>,
+    _db: &State<Arc<Surreal<Any>>>,
     client: &State<Arc<Client>>,
     form: Form<CreateMultipartUpload>,
+    auth_token: AuthToken,
 ) -> Result<(Status, Json<String>), (Status, &'static str)> {
-
-    handle_authorization(db, form.authorization.clone()).await?;
-
+    
     let file_id = Uuid::now_v7();
-    let key = format!("{}/{}", form.authorization.user_id , file_id);
+    let key = format!("{}/{}", auth_token.0.sub , file_id);
 
     let resp = client.create_multipart_upload()
         .bucket(env::var("AWS_BUCKET").unwrap())
@@ -49,8 +46,8 @@ pub async fn create_multipart_upload(
     let upload_id_clone = resp.clone().upload_id.unwrap().to_string();
 
     let mut storage: MutexGuard<PartInfoHashMap> = STORAGE.lock().map_err(|_| (Status::InternalServerError, "Error while collecting file parts"))?;
-    storage.remove(&(form.authorization.user_id.clone(), resp.clone().upload_id.unwrap().to_string()));
-    storage.insert((form.authorization.user_id.clone(), resp.clone().upload_id.unwrap().to_string()),
+    storage.remove(&(auth_token.0.sub.clone(), resp.clone().upload_id.unwrap().to_string()));
+    storage.insert((auth_token.0.sub.clone(), resp.clone().upload_id.unwrap().to_string()),
        PartInfoStorage {
            data: PartInfoStorageData {
                completed_multipart_upload: CompletedMultipartUpload::builder().build(),
@@ -64,7 +61,7 @@ pub async fn create_multipart_upload(
                sleep(tokio::time::Duration::from_secs(300)).await;
                println!("USUWANIE A");
                let mut storage: MutexGuard<PartInfoHashMap> = STORAGE.lock().unwrap();
-               storage.remove(&(form.authorization.user_id.clone(), upload_id_clone.clone()));
+               storage.remove(&(auth_token.0.sub.clone(), upload_id_clone.clone()));
            }),
        });
 

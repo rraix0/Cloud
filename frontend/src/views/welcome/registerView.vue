@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ChevronLeft } from 'lucide-vue-next'
 import axios from 'axios'
+import router from '@/router'
 
 const email = ref('')
 const name = ref('')
@@ -27,6 +28,9 @@ const handleRegister = () => {
     email: email.value,
     name: name.value,
     password: password.value,
+  }).then((response) => {
+    localStorage.setItem('jwt', response.data)
+    router.push('/panel/storage')
   })
 }
 </script>

@@ -2,7 +2,7 @@
 import sidebarComponent from './components/sidebarComponent.vue';
 import router from '@/router'
 
-if (!localStorage.getItem('user_id') || !localStorage.getItem('jwt')) {
+if (!localStorage.getItem('jwt')) {
   router.push('/');
 }
 

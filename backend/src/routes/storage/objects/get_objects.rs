@@ -7,13 +7,11 @@ use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
-use crate::surreal::authorization::handle_authorization;
-use crate::types::auth_type::Authorization;
+use crate::types::auth_type::{AuthToken};
 use crate::types::storage::object::ObjectType;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct GetObjects {
-    pub authorization: Authorization,
     pub parent_id: Thing,
 }
 
@@ -21,14 +19,13 @@ pub struct GetObjects {
 pub async fn get_objects (
     db: &State<Arc<Surreal<Any>>>,
     _client: &State<Arc<Client>>,
-    data: Json<GetObjects>
+    data: Json<GetObjects>,
+    auth_token: AuthToken,
 ) -> Result<(Status, Json<Vec<ObjectType>>), (Status, &'static str)> {
-
-    handle_authorization(db, data.authorization.clone()).await?;
 
     let mut resp = db
     .query("SELECT * FROM files where user_id = $user_id AND parent_id = $parent_id")
-    .bind(("user_id", data.authorization.get_thing().clone()))
+    .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
     .bind(("parent_id", data.parent_id.clone()))
     .await
     .map_err(|e| {

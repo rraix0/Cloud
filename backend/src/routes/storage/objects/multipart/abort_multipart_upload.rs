@@ -6,32 +6,30 @@ use rocket::http::Status;
 use rocket::serde::json::Json;
 use surrealdb::{Surreal, engine::any::Any};
 use crate::routes::storage::objects::multipart::part_info_storage::{PartInfoHashMap, STORAGE};
-use crate::surreal::authorization::handle_authorization;
-use crate::types::auth_type::Authorization;
+use crate::types::auth_type::{AuthToken};
 
 #[derive(FromForm)]
 pub struct AbortUpload {
     upload_id: String,
-    authorization: Authorization,
 }
 
 #[post("/storage/abort_multipart_upload", data = "<form>")]
 pub async fn abort_multipart_upload(
-    db: &State<Arc<Surreal<Any>>>,
+    _db: &State<Arc<Surreal<Any>>>,
     client: &State<Arc<Client>>,
     form: Form<AbortUpload>,
+    auth_token: AuthToken,
 ) -> Result<(Status, Json<String>), (Status, &'static str)> {
-    handle_authorization(db, form.authorization.clone()).await?;
 
     let key:String = {
         let mut storage: MutexGuard<PartInfoHashMap> = STORAGE.lock().map_err(|_| (Status::InternalServerError, "Error while collecting file parts"))?;
-        let value = match storage.get(&(form.authorization.user_id.clone(), form.upload_id.clone())) {
+        let value = match storage.get(&(auth_token.0.sub.clone(), form.upload_id.clone())) {
             Some(storage) => storage.data.key.clone(),
             None => {
                 return Err((Status::InternalServerError, "Error while collecting file part"));
             },
         };
-        storage.remove(&(form.authorization.user_id.clone(), form.upload_id.clone()));
+        storage.remove(&(auth_token.0.sub.clone(), form.upload_id.clone()));
         value
     };
 

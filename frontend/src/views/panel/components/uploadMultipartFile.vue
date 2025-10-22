@@ -37,13 +37,12 @@ export default defineComponent({
       uploadProgress.value = 0
 
       try {
-        const authorization_user_id: string | null = localStorage.getItem('user_id')
-        const authorization_jwt: string | null = localStorage.getItem('jwt')
+
         if (!file) {
           errorMessage.value = 'File not selected'
           return
         }
-        if (!authorization_user_id || !authorization_jwt) {
+        if (!localStorage.getItem("jwt")) {
           errorMessage.value = 'Authorization failed, try logging in again'
           return
         }
@@ -62,13 +61,14 @@ export default defineComponent({
         )
         // @ts-ignore
         formData1.append('size', file.size)
-        formData1.append('authorization.user_id', authorization_user_id)
-        formData1.append('authorization.jwt', authorization_jwt)
         const initResponse = await axios.post(
           import.meta.env.VITE_API_URL + '/storage/create_multipart_upload',
           formData1,
           {
-            headers: { 'Content-Type': 'multipart/form-data' },
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: localStorage.getItem('jwt'),
+            },
           },
         )
         const uploadId = initResponse.data
@@ -80,14 +80,15 @@ export default defineComponent({
           const chunk = file.slice(start, end)
 
           const formData2 = new FormData()
-          formData2.append('authorization.user_id', authorization_user_id)
-          formData2.append('authorization.jwt', authorization_jwt)
           formData2.append('file', chunk, `${title}.part${i + 1}`)
           formData2.append('part_number', (i + 1).toString())
           formData2.append('upload_id', uploadId)
 
           await axios.post(import.meta.env.VITE_API_URL + '/storage/multipart_upload', formData2, {
-            headers: { 'Content-Type': 'multipart/form-data' },
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: localStorage.getItem('jwt'),
+            },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total) {
                 uploadProgress.value = Math.round(
@@ -101,10 +102,11 @@ export default defineComponent({
         // STEP 3
         const formData3 = new FormData()
         formData3.append('upload_id', uploadId)
-        formData3.append('authorization.user_id', authorization_user_id)
-        formData3.append('authorization.jwt', authorization_jwt)
         await axios.post(import.meta.env.VITE_API_URL + '/storage/complete_multipart_upload', formData3, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: localStorage.getItem('jwt'),
+          },
         })
 
         uploadProgress.value = 100
