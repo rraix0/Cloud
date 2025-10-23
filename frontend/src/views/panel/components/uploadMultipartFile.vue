@@ -1,19 +1,11 @@
-<template>
-  <div>
-    <input type="file" @change="handleFileChange" />
-    <button @click="uploadFile" :disabled="!selectedFile">Upload</button>
-    <p v-if="uploadProgress">Upload progress: {{ uploadProgress }}%</p>
-    <p v-if="errorMessage">{{ errorMessage }}</p>
-  </div>
-</template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
 import axios from 'axios'
+import { useStorageStorage } from '@/stores/storageStorage.ts'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
-
-export default defineComponent({
-  setup() {
+    const storage = useStorageStorage()
     const selectedFile = ref<File | null>(null)
     const uploadProgress = ref<number>(0)
     const errorMessage = ref<string>('')
@@ -47,20 +39,11 @@ export default defineComponent({
           return
         }
         // STEP 1
-
         const formData1 = new FormData()
         formData1.append('title', title)
-        formData1.append(
-          'folder',
-          '{\n' +
-          '            "tb": "folders",\n' +
-          '            "id": {\n' +
-          '                "String": "01998ce3-ef40-7244-898a-7c5f281cb815"\n' +
-          '            }\n' +
-          '        }',
-        )
-        // @ts-ignore
-        formData1.append('size', file.size)
+        formData1.append('folder', JSON.stringify(storage?.current_folder_parent?.id))
+
+        formData1.append('size', String(file?.size))
         const initResponse = await axios.post(
           import.meta.env.VITE_API_URL + '/storage/create_multipart_upload',
           formData1,
@@ -107,6 +90,8 @@ export default defineComponent({
             'Content-Type': 'multipart/form-data',
             Authorization: localStorage.getItem('jwt'),
           },
+        }).then(() => {
+          storage.getFiles(storage?.current_folder_parent?.id)
         })
 
         uploadProgress.value = 100
@@ -117,7 +102,12 @@ export default defineComponent({
       }
     }
 
-    return { selectedFile, handleFileChange, uploadFile, uploadProgress, errorMessage }
-  },
-})
 </script>
+<template>
+  <div class="flex gap-2">
+    <Input type="file" class="w-min" @change="handleFileChange" />
+    <Button variant="outline" @click="uploadFile" :disabled="!selectedFile">Upload</Button>
+    <p v-if="uploadProgress">Upload progress: {{ uploadProgress }}%</p>
+    <p v-if="errorMessage">{{ errorMessage }}</p>
+  </div>
+</template>

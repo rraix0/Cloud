@@ -54,6 +54,7 @@ use crate::{
         connection_minio::get_connection_minio
     }
 };
+use crate::routes::storage::objects::delete_object::delete_objects;
 use crate::routes::storage::objects::get_download_uri::get_download_uri;
 use crate::routes::storage::objects::multipart::abort_multipart_upload::abort_multipart_upload;
 
@@ -97,5 +98,6 @@ async fn rocket() -> _ {
             complete_multipart_upload,
             abort_multipart_upload,
             get_download_uri,
+            delete_objects
         ])
 }

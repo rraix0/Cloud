@@ -2,7 +2,7 @@ use rocket::serde::{Deserialize, Serialize};
 use surrealdb::Datetime;
 use surrealdb::sql::{Thing};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Folder {
     created_at: Datetime,
     parent_id: Option<Thing>,

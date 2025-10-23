@@ -12,7 +12,7 @@ use crate::types::storage::object::ObjectType;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct GetObjects {
-    pub parent_id: Thing,
+    pub parent_id: Option<Thing>,
 }
 
 #[post("/storage/get_objects", data = "<data>")]
@@ -23,8 +23,17 @@ pub async fn get_objects (
     auth_token: AuthToken,
 ) -> Result<(Status, Json<Vec<ObjectType>>), (Status, &'static str)> {
 
+    let query = match data.parent_id {
+        Some(_) => {
+            "SELECT * FROM files where user_id = $user_id AND parent_id = $parent_id;"
+        }
+        None => {
+            "SELECT * FROM files where user_id = $user_id AND parent_id.parent_id = none;"
+        }
+    };
+    
     let mut resp = db
-    .query("SELECT * FROM files where user_id = $user_id AND parent_id = $parent_id")
+    .query(query)
     .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
     .bind(("parent_id", data.parent_id.clone()))
     .await

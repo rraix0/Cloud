@@ -6,12 +6,14 @@ import explorerNavComponent from '../components/explorerNavComponent.vue';
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-col">
+  <div class="w-full h-screen flex flex-col">
+    <!--
     <explorerNavComponent />
-    <div class="flex-1 w-full flex">
       <explorerSidebarComponent />
-      <explorerComponent />
     </div>
+    <div class="flex-1 w-full flex ">
+    -->
+      <explorerComponent />
   </div>
 
 

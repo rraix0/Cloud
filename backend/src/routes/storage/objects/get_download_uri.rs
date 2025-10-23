@@ -25,7 +25,7 @@ pub async fn get_download_uri (
     client: &State<Arc<Client>>,
     data: Json<GetDownloadUri>,
     auth_token: AuthToken,
-) -> Result<(Status, Json<String>), (Status, &'static str)> {
+) -> Result<(Status, String), (Status, &'static str)> {
 
     let mut resp = db
         .query("SELECT * FROM files where user_id = $user_id AND id = $id")
@@ -63,5 +63,5 @@ pub async fn get_download_uri (
 
     println!("{:?}", resp);
 
-    Ok((Status::Ok, Json(format!("{:?}", resp.uri()))))
+    Ok((Status::Ok, format!("{:?}", resp.uri())))
 }
