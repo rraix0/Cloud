@@ -86,6 +86,9 @@ export const useStorageStorage = defineStore('storage', () => {
     user_id: object,
   }
 
+  const info_message = ref<string>()
+  const error_message = ref<string>()// TODO apply error and info message in code
+
   const folders = ref<Folder[]>([]);
   const files = ref<File[]>([]);
 

@@ -106,7 +106,7 @@ pub async fn multipart_upload<'a>(
                             completed_multipart_upload: x,
                             ..item.data.clone()},
                         auto_destruction: tokio::spawn(async move {
-                            sleep(tokio::time::Duration::from_secs(10)).await;
+                            sleep(tokio::time::Duration::from_secs(300)).await;
                             println!("USUWANIE B");
 
                             let _ = client_clone.abort_multipart_upload()
