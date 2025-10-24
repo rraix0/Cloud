@@ -62,6 +62,8 @@ pub async fn get_download_uri (
         .await.unwrap();
 
     println!("{:?}", resp);
+    //let url = resp.uri().replace("http://192.168.0.10:9000", "https://cloudminio.raix.site");
+
 
     Ok((Status::Ok, format!("{:?}", resp.uri())))
 }

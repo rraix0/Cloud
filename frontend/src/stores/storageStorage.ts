@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { ArrowDownUp } from 'lucide-vue-next'
 import axios from 'axios'
+import { logout } from '@/views/panel/functions/logout.ts'
 
 export const useStorageStorage = defineStore('storage', () => {
   const headers = ref([
@@ -23,7 +24,7 @@ export const useStorageStorage = defineStore('storage', () => {
         id: 2,
         name: 'Name',
         col_type: 3,
-        style: "w-80",
+        style: "w-100",
         icon: ArrowDownUp,
         selected: true,
       },
@@ -104,6 +105,9 @@ export const useStorageStorage = defineStore('storage', () => {
       current_folder_parent.value = res.data[0];
       console.log(res.data);
     }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
       console.log(err);
     })
   }
@@ -121,6 +125,9 @@ export const useStorageStorage = defineStore('storage', () => {
       files.value = res.data;
       console.log(res.data);
     }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
       console.log(err);
     })
   }
@@ -149,11 +156,87 @@ export const useStorageStorage = defineStore('storage', () => {
       let link: string = res.data as string;
       window.open(link, '_blank',  'noopener,noreferrer');
     }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
       console.log(err);
       throw err;
     })
   }
 
+  function createFolder(values: any) {
+    let name = values.name;
+    if (!name) return;
 
-  return { folders, files, current_folder_parent, headers, getFolders, getFiles, goUp, getDownloadUri }
+    axios.post(import.meta.env.VITE_API_URL + "/storage/create_folder", {
+        parent_id: current_folder_parent.value?.id,
+        name: name
+      },
+      {
+        headers: {
+          Authorization: localStorage.getItem('jwt'),
+        }}
+    ).then(res => {
+      if (current_folder_parent.value) {
+        getFolders(current_folder_parent.value.id);
+      } else {
+        getFolders(undefined);
+      }
+
+      console.log(res.data);
+    }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
+      console.log(err);
+      throw err;
+    })
+  }
+
+  function deleteFolders(folder_id: object[]) {
+    axios.post(import.meta.env.VITE_API_URL + "/storage/delete_folders", {
+        folders_ids: folder_id,
+      },
+      {
+        headers: {
+          Authorization: localStorage.getItem('jwt'),
+        }}
+    ).then(res => {
+      if (current_folder_parent.value) {
+        getFolders(current_folder_parent.value.id);
+      } else {
+        getFolders(undefined);
+      }
+    }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
+      console.log(err);
+      throw err;
+    })
+  }
+  function deleteFiles(file_ids: object[]) {
+    axios.post(import.meta.env.VITE_API_URL + "/storage/delete_objects", {
+        object_ids: file_ids,
+      },
+      {
+        headers: {
+          Authorization: localStorage.getItem('jwt'),
+        }}
+    ).then(res => {
+      if (current_folder_parent.value) {
+        getFiles(current_folder_parent.value.id);
+      } else {
+        getFiles(undefined);
+      }
+    }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
+      console.log(err);
+      throw err;
+    })
+  }
+
+  return { folders, files, current_folder_parent, headers, getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles}
 })

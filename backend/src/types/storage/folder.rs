@@ -13,7 +13,7 @@ pub struct Folder {
     user_id: Thing,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct CreateFolder {
     pub parent_id: Thing,
     pub name: String

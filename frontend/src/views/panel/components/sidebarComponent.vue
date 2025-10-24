@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ref } from 'vue'
 import router from '@/router'
 
+import { logout } from '@/views/panel/functions/logout.ts'
 const route = useRoute()
 const openSidebar = ref<boolean>(true)
 
@@ -14,13 +15,6 @@ const toggleSidebar = () => {
   openSidebar.value = !openSidebar.value;
 }
 
-const logout = () => {
-  localStorage.removeItem('authorization')
-  localStorage.removeItem('user_id')
-  localStorage.removeItem('jwt')
-  localStorage.clear()
-  router.push('/')
-}
 
 </script>
 

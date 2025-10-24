@@ -15,8 +15,9 @@ pub async fn create_folder(
     db: &State<Arc<Surreal<Any>>>,
     auth_token: AuthToken,
 ) -> Result<(Status, Json<Folder>), (Status, &'static str)> {
-
-
+    if !(data.clone().name.trim().len() > 0) {
+        return Err((Status::BadRequest, "No file name specified"))
+    }
     let result = db
         .query("insert into folders (id, created_at, parent_id, name, user_id)
 values ($id, time::now(), $parent_id, $name, $user_id);")

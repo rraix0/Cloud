@@ -42,6 +42,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { useStorageStorage } from '@/stores/storageStorage.ts'
 const storage = useStorageStorage()
 
@@ -49,6 +58,9 @@ storage.getFolders();
 storage.getFiles();
 
 import UploadMultipartFile from '@/views/panel/components/uploadMultipartFile.vue'
+import { toTypedSchema } from '@vee-validate/zod'
+import * as z from 'zod'
+import { ErrorMessage } from 'vee-validate'
 
 function formatBytes(bytes:number) {
   if (bytes === 0) return '0 B';
@@ -64,49 +76,57 @@ const allSelected = computed({
     storage.files.forEach(item => item.selected = value);
   }
 });
+const schemaCreateFolder = toTypedSchema(z.object({
+  name: z.string().min(2).max(50),
+}));
 
 
 </script>
 
 <template>
   <div class="h-full max-h-full overflow-auto p-3">
+
     <div class="flex items-center py-4">
       <Input class="max-w-sm" placeholder="Filter files..." />
-      <Button
-        variant="outline"
-        size="sm"
-        class="ml-5"
-        :disabled="false"
-        @click="() => {storage.goUp();}"
-      >
+      <Button variant="outline" class="ml-5" @click="() => {storage.goUp();}">
         Go up
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        class="ml-5"
-        :disabled="false"
-        @click=""
-      >
-        Create folder
-      </Button>
-      <AlertDialog>
-        <AlertDialogTrigger>Open</AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your account
-              and remove your data from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction>Continue</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
+      <Form v-slot="{ handleSubmit }" as="" keep-values :validation-schema="schemaCreateFolder">
+        <Dialog>
+          <DialogTrigger as-child>
+            <Button class="ml-2" variant="outline">
+              Create Folder
+            </Button>
+          </DialogTrigger>
+          <DialogContent class="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create Folder</DialogTitle>
+            </DialogHeader>
+            <form id="dialogForm" @submit="handleSubmit($event, storage.createFolder)">
+              <FormField v-slot="{ componentField }" name="name">
+                <FormItem>
+                  <FormLabel>Folder name</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Folder name" v-bind="componentField" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </form>
+            <DialogFooter>
+              <DialogClose>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <DialogClose>
+                <Button type="submit" form="dialogForm">
+                  Create folder
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </Form>
 
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
@@ -141,7 +161,8 @@ const allSelected = computed({
           </TableRow>
         </TableHeader>
         <TableBody>
-          <template v-if="true">
+          <template v-if="storage.folders.length > 0 || storage.files.length > 0">
+
             <!-- ================== FOLDERS ================== -->
             <TableRow v-for="(item, index) in storage.folders" :key="index">
               <TableCell v-show="storage.headers[0]?.selected" >
@@ -150,10 +171,44 @@ const allSelected = computed({
               <TableCell v-show="storage.headers[1]?.selected">
                 <Folder />
               </TableCell>
-              <TableCell v-show="storage.headers[2]?.selected" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">{{ item.name }}</TableCell>
+              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">{{ item.name }}</TableCell>
               <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
               <TableCell v-show="storage.headers[4]?.selected">{{  }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
+              <TableCell v-show="storage.headers[6]?.selected">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Menu />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem @click="storage.getDownloadUri(item.id)"><Download /> Download</DropdownMenuItem>
+                    <DropdownMenuItem><PencilLine /> Rename</DropdownMenuItem>
+                    <DropdownMenuItem><Move /> Move</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem class="text-red-500">
+                      <AlertDialog>
+                        <AlertDialogTrigger @click.stop class="w-full flex gap-2">
+                          <Trash class="text-red-500" /> Delete
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete <span class="text-red-500">{{ item.name }}</span> ?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your folder!<br>It only deletes empty folders!
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction class="text-white bg-red-500 hover:bg-red-400" @click="storage.deleteFolders([item.id])">
+                              <Trash class="text-white" /> Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
             </TableRow>
             <!-- ================== FILES ================== -->
             <TableRow v-for="(item, index) in storage.files" :key="index">
@@ -179,19 +234,19 @@ const allSelected = computed({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-red-500">
                       <AlertDialog>
-                        <AlertDialogTrigger @click.stop class="flex gap-2">
+                        <AlertDialogTrigger @click.stop class="w-full flex gap-2">
                           <Trash class="text-red-500" /> Delete
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogTitle>Delete <span class="text-red-500">{{item.name}}</span> ?</AlertDialogTitle>
                             <AlertDialogDescription>
                               This action cannot be undone. This will permanently delete your file!
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction class="text-white bg-red-500 hover:bg-red-400"><Trash class="text-white" /> Delete</AlertDialogAction>
+                            <AlertDialogAction class="text-white bg-red-500 hover:bg-red-400" @click="storage.deleteFiles([item.id])"><Trash class="text-white" /> Delete</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
