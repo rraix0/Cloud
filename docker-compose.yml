@@ -28,6 +28,7 @@ services:
       - SURREAL_DATABASE=${SURREAL_DATABASE}
       - SURREAL_USERNAME=${SURREAL_USERNAME}
       - SURREAL_PASSWORD=${SURREAL_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - frontend
     ports:

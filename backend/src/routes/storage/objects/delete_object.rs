@@ -1,7 +1,6 @@
-use std::env;
 use std::sync::Arc;
 use aws_sdk_s3::Client;
-use aws_sdk_s3::types::{Delete, ObjectIdentifier};
+use aws_sdk_s3::types::{ObjectIdentifier};
 use rocket::{post, State};
 use rocket::http::Status;
 use rocket::serde::{Deserialize, Serialize};
@@ -10,7 +9,6 @@ use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 use crate::types::auth_type::{AuthToken};
-use crate::types::storage::object::ObjectType;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct DeleteObjects {
@@ -19,10 +17,10 @@ pub struct DeleteObjects {
 
 #[post("/storage/delete_objects", data = "<data>")]
 pub async fn delete_objects (
-    db: &State<Arc<Surreal<Any>>>,
-    client: &State<Arc<Client>>,
+    _db: &State<Arc<Surreal<Any>>>,
+    _client: &State<Arc<Client>>,
     data: Json<DeleteObjects>,
-    auth_token: AuthToken,
+    _auth_token: AuthToken,
 ) -> Result<(Status, ()), (Status, &'static str)> {
 
     let objects = data.ids.iter()

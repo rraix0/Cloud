@@ -43,8 +43,10 @@ pub async fn login(
 
     let claims: Claims = Claims{
         exp: (Utc::now() + Duration::hours(24)).timestamp() as usize,
-        sub: user.id.id.to_raw()
+        sub: user.id.id.to_raw(),
+        sub_jwt: user.jwt
     };
+    println!("{:?}", claims);
 
     let token = encode(&Header::new(Algorithm::default()), &claims, &EncodingKey::from_secret(env::var("JWT_SECRET").unwrap().as_bytes()));
     match token {

@@ -107,9 +107,9 @@ pub async fn register(
     });
 
 
-    let user_id = match created_user.take() {
+    let user = match created_user.take() {
         Some(result) => {
-            result.get_id()
+            result
         }
         None => {
            return Err((Status::InternalServerError, "Couldn't parse user"));
@@ -118,7 +118,8 @@ pub async fn register(
 
     let claims: Claims = Claims{
         exp: (Utc::now() + Duration::hours(24)).timestamp() as usize,
-        sub: user_id
+        sub: user.get_id(),
+        sub_jwt: user.jwt
     };
 
     let token = encode(&Header::new(Algorithm::default()), &claims, &EncodingKey::from_secret(env::var("JWT_SECRET").unwrap().as_bytes()));
