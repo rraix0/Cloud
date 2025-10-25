@@ -13,6 +13,7 @@ pub struct PartInfoStorageData {
     pub title: String,
     pub folder: Thing,
     pub size: u64,
+    pub parts_size: HashMap<i32, i64>,
 }
 
 pub struct PartInfoStorage {

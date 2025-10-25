@@ -15,7 +15,6 @@ const toggleSidebar = () => {
   openSidebar.value = !openSidebar.value;
 }
 
-
 </script>
 
 <template>

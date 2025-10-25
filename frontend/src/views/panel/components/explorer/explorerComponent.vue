@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUpDown, ChevronDown, Check, Folder, File, ArrowDownUp, Menu, Trash, Download, PencilLine, Move  } from 'lucide-vue-next'
+import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Folder, File, ArrowDownUp, Menu, Trash, Download, PencilLine, Move, ChevronUp  } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -57,10 +57,11 @@ const storage = useStorageStorage()
 storage.getFolders();
 storage.getFiles();
 
-import UploadMultipartFile from '@/views/panel/components/uploadMultipartFile.vue'
+import UploadMultipartFile from '@/views/panel/components/explorer/uploadMultipartFile.vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { ErrorMessage } from 'vee-validate'
+import UploadFiles from '@/views/panel/components/explorer/uploadFiles.vue'
 
 function formatBytes(bytes:number) {
   if (bytes === 0) return '0 B';
@@ -85,18 +86,28 @@ const schemaCreateFolder = toTypedSchema(z.object({
 
 <template>
   <div class="h-full max-h-full overflow-auto p-3">
+    <div class="flex flex-col gap-2">
+      <span v-if="storage.error_message" class="flex w-full border border-red-500 rounded-md p-1 text-center text-red-400 font-bold pl-3">
+        {{ storage.error_message }}
+        <CircleX class="ml-auto mr-1 hover:text-white hover:cursor-pointer" @click="storage.error_message = ''" />
+      </span>
+      <span v-if="storage.info_message" class="flex w-full border border-green-500 rounded-md p-1 text-center text-green-400 font-bold pl-3">
+        {{ storage.info_message }}
+        <CircleX class="ml-auto mr-1 hover:text-white hover:cursor-pointer" @click="storage.info_message = ''" />
+      </span>
+    </div>
 
     <div class="flex items-center py-4">
-      <Input class="max-w-sm" placeholder="Filter files..." />
+      <Input class="max-w-sm" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
       <Button variant="outline" class="ml-5" @click="() => {storage.goUp();}">
-        Go up
+        <ChevronUp /> Go up
       </Button>
 
       <Form v-slot="{ handleSubmit }" as="" keep-values :validation-schema="schemaCreateFolder">
         <Dialog>
           <DialogTrigger as-child>
             <Button class="ml-2" variant="outline">
-              Create Folder
+              <Plus /> Create Folder
             </Button>
           </DialogTrigger>
           <DialogContent class="sm:max-w-[425px]">
@@ -128,10 +139,14 @@ const schemaCreateFolder = toTypedSchema(z.object({
         </Dialog>
       </Form>
 
+      <Button variant="outline" class="ml-auto" @click="() => {storage.refreshData();}">
+        <RefreshCcw /> Refresh
+      </Button>
+
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button variant="outline" class="ml-auto">
-            Columns <ChevronDown class="ml-2 h-4 w-4" />
+          <Button variant="outline" class="ml-6">
+            <Columns3Cog /> Columns <ChevronDown class="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -164,8 +179,8 @@ const schemaCreateFolder = toTypedSchema(z.object({
           <template v-if="storage.folders.length > 0 || storage.files.length > 0">
 
             <!-- ================== FOLDERS ================== -->
-            <TableRow v-for="(item, index) in storage.folders" :key="index">
-              <TableCell v-show="storage.headers[0]?.selected" >
+            <TableRow v-for="(item, index) in storage.folders.filter(x => x.show !== false)" :key="index">
+              <TableCell v-show="storage.headers[0]?.selected">
                 <Checkbox v-model="item.selected" />
               </TableCell>
               <TableCell v-show="storage.headers[1]?.selected">
@@ -211,7 +226,7 @@ const schemaCreateFolder = toTypedSchema(z.object({
               </TableCell>
             </TableRow>
             <!-- ================== FILES ================== -->
-            <TableRow v-for="(item, index) in storage.files" :key="index">
+            <TableRow v-for="(item, index) in storage.files.filter(x => x.show !== false )" :key="index">
               <TableCell v-show="storage.headers[0]?.selected" >
                 <Checkbox v-model="item.selected" />
               </TableCell>
@@ -229,10 +244,45 @@ const schemaCreateFolder = toTypedSchema(z.object({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem @click="storage.getDownloadUri(item.id)"><Download /> Download</DropdownMenuItem>
-                    <DropdownMenuItem><PencilLine /> Rename</DropdownMenuItem>
+                    <DropdownMenuItem>
+
+                      <Form v-slot="{ handleSubmit }" as="" keep-values :validation-schema="schemaCreateFolder">
+                        <Dialog>
+                          <DialogTrigger @click.stop class="flex gap-2">
+                            <PencilLine /> Rename
+                          </DialogTrigger>
+                          <DialogContent class="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Rename file</DialogTitle>
+                            </DialogHeader>
+                            <form id="dialogForm" @submit="handleSubmit($event, storage.renameFile)">
+                              <FormField v-slot="{ componentField }" name="name">
+                                <FormItem>
+                                  <FormControl>
+                                    <Input type="text" placeholder="File name" v-bind="componentField" v-model="item.name" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              </FormField>
+                            </form>
+                            <DialogFooter>
+                              <DialogClose>
+                                <Button variant="outline">Cancel</Button>
+                              </DialogClose>
+                              <DialogClose>
+                                <Button type="submit" form="dialogForm">
+                                  Submit
+                                </Button>
+                              </DialogClose>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </Form>
+
+                    </DropdownMenuItem>
                     <DropdownMenuItem><Move /> Move</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem class="text-red-500">
+                    <DropdownMenuItem class="text-red-500"> <!-- DELETE -->
                       <AlertDialog>
                         <AlertDialogTrigger @click.stop class="w-full flex gap-2">
                           <Trash class="text-red-500" /> Delete
@@ -275,6 +325,9 @@ const schemaCreateFolder = toTypedSchema(z.object({
 
     <hr>
     <upload-multipart-file></upload-multipart-file>
+  <br>
+    <hr>
+    <UploadFiles />
 
   </div>
 </template>

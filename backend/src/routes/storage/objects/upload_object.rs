@@ -6,20 +6,23 @@ use rocket::fs::TempFile;
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use surrealdb::{Surreal, engine::any::Any};
+use surrealdb::sql::Thing;
+use uuid::Uuid;
 use crate::types::auth_type::{AuthToken};
 
-#[derive(FromForm)]
+#[derive(FromForm, Debug)]
 pub struct UploadObject<'a> {
     file: TempFile<'a>,
     title: String,
+    folder: Json<Thing>,
 }
 
 #[post("/storage/upload_object", data = "<form>")]
 pub async fn upload_object<'a>(
-    _db: &State<Arc<Surreal<Any>>>,
+    db: &State<Arc<Surreal<Any>>>,
     client: &State<Arc<Client>>,
     form: Form<UploadObject<'a>>,
-    _auth_token: AuthToken,
+    auth_token: AuthToken,
 ) -> Result<(Status, Json<String>), (Status, &'static str)> {
 
     println!("{:?}, {:?}", form.file.name(), form.file.content_type());
@@ -29,13 +32,45 @@ pub async fn upload_object<'a>(
 
     let stream_bytes = ByteStream::from_path(path.unwrap()).await.unwrap();
 
+    let object_id = Uuid::now_v7();
+    let size = form.file.len();
+    let key = format!("{}/{}", auth_token.0.sub, object_id);
+
     client.put_object()
         .bucket(env::var("AWS_BUCKET").unwrap())
-        .key(format!("{}", form.title.clone()))
+        .key(key.clone())
         .body(stream_bytes)
         .send()
         .await
         .map_err(|_| (Status::BadRequest, "no upload object"))?;
 
-    Ok((Status::Ok, Json(format!("Uploaded {}", "sdfklj".to_string()))))
+
+
+
+    let resp = db
+        .query("insert into files
+                (id, user_id, object_id, name, size, created_at, parent_id)
+                values ($id, $user_id, $object_id, $name, $size, time::now(), $parent_id);")
+        .bind(("id", object_id.to_string().clone()))
+        .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
+        .bind(("object_id", object_id.to_string().clone()))
+        .bind(("name", form.title.clone()))
+        .bind(("size", size.clone()))
+        .bind(("parent_id", form.folder.clone().into_inner() ))
+        .await;
+
+
+    if let Err(_) = resp {
+        let _ = client.delete_object()
+            .bucket(env::var("AWS_BUCKET").unwrap())
+            .key(key)
+            .send()
+            .await
+            .map_err(|err| {
+                eprintln!("Occurred an error while trying to remove file after db error: {:?}", err);
+            });
+        return Err((Status::InternalServerError, "Occurred server error while trying to upload file"));
+    }
+
+    Ok((Status::Ok, Json(format!("{:#?}", resp))))
 }

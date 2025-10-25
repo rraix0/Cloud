@@ -61,11 +61,14 @@ import { Input } from '@/components/ui/input'
           const start = i * chunkSize
           const end = Math.min(start + chunkSize, file.size)
           const chunk = file.slice(start, end)
+          const size = chunk.size ?? 0
+          console.log(size, String(size))
 
           const formData2 = new FormData()
           formData2.append('file', chunk, `${title}.part${i + 1}`)
           formData2.append('part_number', (i + 1).toString())
           formData2.append('upload_id', uploadId)
+          formData2.append('size', String(size))
 
           await axios.post(import.meta.env.VITE_API_URL + '/storage/multipart_upload', formData2, {
             headers: {

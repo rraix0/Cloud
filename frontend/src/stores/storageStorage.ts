@@ -10,14 +10,14 @@ export const useStorageStorage = defineStore('storage', () => {
         id: 0,
         name: 'Select',
         col_type: 2,
-        style: "w-8",
+        style: "w-7",
         selected: true,
       },
       {
         id: 1,
         name: 'Icon',
         col_type: 1,
-        style: "w-15",
+        style: "w-10",
         selected: true,
       },
       {
@@ -32,7 +32,7 @@ export const useStorageStorage = defineStore('storage', () => {
         id: 3,
         name: 'date',
         col_type: 3,
-        style: "w-35",
+        style: "w-25",
         icon: ArrowDownUp,
         selected: true,
       },
@@ -48,14 +48,14 @@ export const useStorageStorage = defineStore('storage', () => {
       id: 5,
       name: 'shared',
       col_type: 1,
-      style: "w-20",
+      style: "w-15",
       selected: true,
       },
     {
       id: 6,
       name: 'menu',
       col_type: 1,
-      style: "w-20",
+      style: "w-15",
       selected: true,
     },
     ],
@@ -63,6 +63,7 @@ export const useStorageStorage = defineStore('storage', () => {
 
   interface Folder {
     selected: boolean,
+    show: boolean,
     created_at: Date,
     id: object,
     name: string,
@@ -74,6 +75,7 @@ export const useStorageStorage = defineStore('storage', () => {
 
   interface File {
     selected: boolean,
+    show: boolean,
     created_at: Date,
     id: object,
     metadata: object,
@@ -111,6 +113,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
+      error_message.value = err.message;
       console.log(err);
     })
   }
@@ -131,14 +134,27 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
+      error_message.value = err.message;
       console.log(err);
     })
   }
+
   const goUp = () => {
     if (current_folder_parent.value) {
       getFolders(current_folder_parent.value.parent_id);
       getFiles(current_folder_parent.value.parent_id);
       console.log(current_folder_parent.value.parent_id);
+    } else {
+      getFolders(undefined);
+      getFiles(undefined);
+    }
+  };
+
+  const refreshData = () => {
+    if (current_folder_parent.value) {
+      getFolders(current_folder_parent.value.id);
+      getFiles(current_folder_parent.value.id);
+      console.log(current_folder_parent.value.id);
     } else {
       getFolders(undefined);
       getFiles(undefined);
@@ -163,14 +179,14 @@ export const useStorageStorage = defineStore('storage', () => {
         logout()
       }
       console.log(err);
+      error_message.value = err.message;
       throw err;
     })
   }
 
-  function createFolder(values: any) {
+  function createFolder(values: { name?: string }) {
     let name = values.name;
     if (!name) return;
-
     axios.post(import.meta.env.VITE_API_URL + "/storage/create_folder", {
         parent_id: current_folder_parent.value?.id,
         name: name
@@ -191,6 +207,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
+      error_message.value = err.message;
       console.log(err);
       throw err;
     })
@@ -214,6 +231,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
+      error_message.value = err.message;
       console.log(err);
       throw err;
     })
@@ -236,10 +254,44 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
+      error_message.value = err.message;
       console.log(err);
       throw err;
     })
   }
 
-  return { folders, files, current_folder_parent, headers, getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles}
+  const filterValues = (phrase: string) => {
+    console.log(phrase);
+    folders.value.map((item: Folder) => {
+      if (!phrase) {
+        item.show = true;
+      } else if (item.name.toLowerCase().includes(phrase.toLowerCase())) {
+        item.show = true;
+      } else {
+        item.show = false;
+      }
+    });
+    files.value.map((item: File) => {
+      if (!phrase) {
+        item.show = true;
+      } else if (item.name.toLowerCase().includes(phrase.toLowerCase())) {
+        item.show = true;
+      } else {
+        item.show = false;
+      }
+    });
+  }
+
+  const renameFolder = (values: { name?: string }) => {
+  }
+  const renameFile = (values: { name?: string }) => {
+    console.log(values);
+    console.log(typeof values);
+
+  }
+
+  return { folders, files, current_folder_parent, headers, error_message, info_message,
+    getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues,
+    renameFolder, renameFile
+  }
 })

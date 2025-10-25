@@ -1,6 +1,8 @@
 use std::env;
 use std::sync::Arc;
 use std::time::Duration;
+use aws_config::meta::region::RegionProviderChain;
+use aws_config::{BehaviorVersion, Region};
 use aws_sdk_s3::Client;
 use aws_sdk_s3::presigning::PresigningConfig;
 use rocket::{post, State};
@@ -22,7 +24,7 @@ pub struct GetDownloadUri {
 #[post("/storage/get_download_uri", data = "<data>")]
 pub async fn get_download_uri (
     db: &State<Arc<Surreal<Any>>>,
-    client: &State<Arc<Client>>,
+    _client: &State<Arc<Client>>,
     data: Json<GetDownloadUri>,
     auth_token: AuthToken,
 ) -> Result<(Status, String), (Status, &'static str)> {
@@ -48,6 +50,27 @@ pub async fn get_download_uri (
     };
 
     let file_name = objects[0].name.clone();
+
+    // CLIENT TO CREATE PUBLIC LINKS
+    let endpoint_url = std::env::var("AWS_ENDPOINT_PUBLIC_URL")
+        .expect("AWS_ENDPOINT_PUBLIC_URL must be set");
+    let region = std::env::var("AWS_REGION")
+        .unwrap_or_else(|_| "eu-central-1".to_string());
+
+    let region_provider = RegionProviderChain::first_try(Region::new(region.clone()));
+
+    let config = aws_config::defaults(BehaviorVersion::latest())
+        .region(region_provider)
+        .load()
+        .await;
+
+    let s3_config = aws_sdk_s3::config::Builder::from(&config)
+        .endpoint_url(endpoint_url)
+        .force_path_style(true)
+        .build();
+
+    let client = Client::from_conf(s3_config);
+    // END
 
     let resp = client
         .get_object()

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 use std::sync::{Arc, MutexGuard};
 use std::time::SystemTime;
@@ -56,6 +57,7 @@ pub async fn create_multipart_upload(
                title: form.title.clone(),
                folder: form.folder.clone().into_inner(),
                size: form.size,
+               parts_size: HashMap::new(),
            },
            auto_destruction: tokio::spawn(async move {
                sleep(tokio::time::Duration::from_secs(300)).await;
