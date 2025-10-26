@@ -140,25 +140,13 @@ export const useStorageStorage = defineStore('storage', () => {
   }
 
   const goUp = () => {
-    if (current_folder_parent.value) {
-      getFolders(current_folder_parent.value.parent_id);
-      getFiles(current_folder_parent.value.parent_id);
-      console.log(current_folder_parent.value.parent_id);
-    } else {
-      getFolders(undefined);
-      getFiles(undefined);
-    }
+    getFolders(current_folder_parent.value?.parent_id);
+    getFiles(current_folder_parent.value?.parent_id);
   };
 
   const refreshData = () => {
-    if (current_folder_parent.value) {
-      getFolders(current_folder_parent.value.id);
-      getFiles(current_folder_parent.value.id);
-      console.log(current_folder_parent.value.id);
-    } else {
-      getFolders(undefined);
-      getFiles(undefined);
-    }
+      getFolders(current_folder_parent.value?.id);
+      getFiles(current_folder_parent.value?.id);
   };
 
   const getDownloadUri = async (object_id: object) => {

@@ -45,8 +45,6 @@ pub async fn upload_object<'a>(
         .map_err(|_| (Status::BadRequest, "no upload object"))?;
 
 
-
-
     let resp = db
         .query("insert into files
                 (id, user_id, object_id, name, size, created_at, parent_id)

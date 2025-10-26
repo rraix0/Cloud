@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Folder, File, ArrowDownUp, Menu, Trash, Download, PencilLine, Move, ChevronUp  } from 'lucide-vue-next'
+import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp  } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -52,16 +52,23 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { useStorageStorage } from '@/stores/storageStorage.ts'
+import { useUploaderStorage} from '@/stores/uploaderStorage.ts'
+
 const storage = useStorageStorage()
+const uploader_storage = useUploaderStorage()
 
 storage.getFolders();
 storage.getFiles();
 
 import UploadMultipartFile from '@/views/panel/components/explorer/uploadMultipartFile.vue'
 import { toTypedSchema } from '@vee-validate/zod'
-import * as z from 'zod'
+
 import { ErrorMessage } from 'vee-validate'
-import UploadFiles from '@/views/panel/components/explorer/uploadFiles.vue'
+import UploadFilesComponent from '@/views/panel/components/small_components/uploadFilesComponent.vue'
+import AddNewComponent from '@/views/panel/components/small_components/addNewComponent.vue'
+import * as z from 'zod'
+import ColumnsDropDownMenuComopnent from '@/views/panel/components/small_components/columnsDropDownMenuComopnent.vue'
+import UploadQueueComponent from '@/views/panel/components/small_components/uploadQueueComponent.vue'
 
 function formatBytes(bytes:number) {
   if (bytes === 0) return '0 B';
@@ -77,10 +84,10 @@ const allSelected = computed({
     storage.files.forEach(item => item.selected = value);
   }
 });
+
 const schemaCreateFolder = toTypedSchema(z.object({
   name: z.string().min(2).max(50),
 }));
-
 
 </script>
 
@@ -100,63 +107,19 @@ const schemaCreateFolder = toTypedSchema(z.object({
     <div class="flex items-center py-4">
       <Input class="max-w-sm" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
       <Button variant="outline" class="ml-5" @click="() => {storage.goUp();}">
-        <ChevronUp /> Go up
+        <ChevronsUp /> Go up
       </Button>
 
-      <Form v-slot="{ handleSubmit }" as="" keep-values :validation-schema="schemaCreateFolder">
-        <Dialog>
-          <DialogTrigger as-child>
-            <Button class="ml-2" variant="outline">
-              <Plus /> Create Folder
-            </Button>
-          </DialogTrigger>
-          <DialogContent class="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create Folder</DialogTitle>
-            </DialogHeader>
-            <form id="dialogForm" @submit="handleSubmit($event, storage.createFolder)">
-              <FormField v-slot="{ componentField }" name="name">
-                <FormItem>
-                  <FormLabel>Folder name</FormLabel>
-                  <FormControl>
-                    <Input type="text" placeholder="Folder name" v-bind="componentField" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-            </form>
-            <DialogFooter>
-              <DialogClose>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <DialogClose>
-                <Button type="submit" form="dialogForm">
-                  Create folder
-                </Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </Form>
+
+      <addNewComponent />
+
+      <uploadQueueComponent v-if="uploader_storage.uploadQueue.length > 0" />
 
       <Button variant="outline" class="ml-auto" @click="() => {storage.refreshData();}">
         <RefreshCcw /> Refresh
       </Button>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button variant="outline" class="ml-6">
-            <Columns3Cog /> Columns <ChevronDown class="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem v-for="item in storage.headers" :key="item.id" v-model:model-value="item.selected">
-            {{ item.name }}
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ColumnsDropDownMenuComopnent />
     </div>
 
     <div class="rounded-md border overflow-y-auto">
@@ -322,12 +285,6 @@ const schemaCreateFolder = toTypedSchema(z.object({
         {{ storage.folders.length + storage.files.length }} item(s) selected.
       </div>
     </div>
-
-    <hr>
-    <upload-multipart-file></upload-multipart-file>
-  <br>
-    <hr>
-    <UploadFiles />
 
   </div>
 </template>

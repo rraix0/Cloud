@@ -42,8 +42,8 @@ import { Input } from '@/components/ui/input'
         const formData1 = new FormData()
         formData1.append('title', title)
         formData1.append('folder', JSON.stringify(storage?.current_folder_parent?.id))
-
         formData1.append('size', String(file?.size))
+
         const initResponse = await axios.post(
           import.meta.env.VITE_API_URL + '/storage/create_multipart_upload',
           formData1,

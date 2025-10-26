@@ -33,7 +33,6 @@ use crate::{
                     part_info_storage::STORAGE,
                 },
                 get_objects::get_objects,
-                upload_object_uri::upload_objects_uri,
                 upload_object::upload_object
             }
         }
@@ -91,8 +90,7 @@ async fn rocket() -> _ {
             get_folders,
             delete_folders,
             get_objects,
-            upload_objects_uri,
-            upload_object, //just leave it alone pls
+            upload_object,
             create_multipart_upload,
             multipart_upload,
             complete_multipart_upload,
