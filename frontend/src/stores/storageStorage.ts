@@ -97,6 +97,7 @@ export const useStorageStorage = defineStore('storage', () => {
   const current_folder_parent = ref<Folder>();
 
   const getFolders = (parent_id: object | undefined = undefined) => {
+    folders.value = [];
     axios.post(import.meta.env.VITE_API_URL + "/storage/get_folders", {
         parent_id: parent_id,
       },
@@ -119,6 +120,7 @@ export const useStorageStorage = defineStore('storage', () => {
   }
 
   const getFiles = (parent_id: object | undefined = undefined) => {
+    files.value = [];
     axios.post(import.meta.env.VITE_API_URL + "/storage/get_objects", {
         parent_id: parent_id,
       },
