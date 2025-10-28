@@ -28,3 +28,10 @@ pub struct GetFolders {
 pub struct DeleteFolders {
     pub folders_ids: Vec<Thing>,
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+#[derive(Clone)]
+pub struct RenameFolder {
+    pub folder_id: Thing,
+    pub name: String,
+}
