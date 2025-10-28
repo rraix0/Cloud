@@ -272,12 +272,48 @@ export const useStorageStorage = defineStore('storage', () => {
     });
   }
 
-  const renameFolder = (values: { name?: string }) => {
+  const renameFolder = (values: { name?: string }, folder_id: object) => {
+    if (!values.name) return;
+    axios.post(import.meta.env.VITE_API_URL + "/storage/rename_folder", {
+        folder_id: folder_id,
+        name: values.name,
+      },
+      {
+        headers: {
+          Authorization: localStorage.getItem('jwt'),
+        }}
+    ).then(res => {
+      getFolders(current_folder_parent.value?.id);
+    }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
+      error_message.value = err.message;
+      console.log(err);
+      throw err;
+    })
   }
-  const renameFile = (values: { name?: string }) => {
-    console.log(values);
-    console.log(typeof values);
+  const renameFile = (values: { name?: string }, object_id: object) => {
 
+    if (!values.name) return;
+    axios.post(import.meta.env.VITE_API_URL + "/storage/rename_object", {
+        object_id: object_id,
+        name: values.name,
+      },
+      {
+        headers: {
+          Authorization: localStorage.getItem('jwt'),
+        }}
+    ).then(res => {
+      getFiles(current_folder_parent.value?.id);
+    }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
+      error_message.value = err.message;
+      console.log(err);
+      throw err;
+    })
   }
 
   return { folders, files, current_folder_parent, headers, error_message, info_message,

@@ -160,8 +160,44 @@ const schemaCreateFolder = toTypedSchema(z.object({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem @click="storage.getDownloadUri(item.id)"><Download /> Download</DropdownMenuItem>
-                    <DropdownMenuItem><PencilLine /> Rename</DropdownMenuItem>
+
+                    <DropdownMenuItem>       <!-- RENAME -->
+                      <Form v-slot="{ handleSubmit }" as="" keep-values :validation-schema="schemaCreateFolder">
+                        <Dialog>
+                          <DialogTrigger @click.stop class="flex gap-2">
+                            <PencilLine /> Rename
+                          </DialogTrigger>
+                          <DialogContent class="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Rename file</DialogTitle>
+                            </DialogHeader>
+                            <form id="dialogForm" @submit="handleSubmit(values => storage.renameFolder(values, item.id))">
+                              <FormField v-slot="{ componentField }" name="name">
+                                <FormItem>
+                                  <FormControl>
+                                    <Input type="text" placeholder="File name" v-bind="componentField" :defaultValue="item.name" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              </FormField>
+                            </form>
+                            <DialogFooter>
+                              <DialogClose>
+                                <Button variant="outline">Cancel</Button>
+                              </DialogClose>
+                              <DialogClose>
+                                <Button type="submit" form="dialogForm">
+                                  Submit
+                                </Button>
+                              </DialogClose>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </Form>
+                    </DropdownMenuItem>
+
                     <DropdownMenuItem><Move /> Move</DropdownMenuItem>
+
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-red-500">
                       <AlertDialog>
@@ -207,8 +243,8 @@ const schemaCreateFolder = toTypedSchema(z.object({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem @click="storage.getDownloadUri(item.id)"><Download /> Download</DropdownMenuItem>
-                    <DropdownMenuItem>
 
+                    <DropdownMenuItem>       <!-- RENAME -->
                       <Form v-slot="{ handleSubmit }" as="" keep-values :validation-schema="schemaCreateFolder">
                         <Dialog>
                           <DialogTrigger @click.stop class="flex gap-2">
@@ -218,11 +254,11 @@ const schemaCreateFolder = toTypedSchema(z.object({
                             <DialogHeader>
                               <DialogTitle>Rename file</DialogTitle>
                             </DialogHeader>
-                            <form id="dialogForm" @submit="handleSubmit($event, storage.renameFile)">
+                            <form id="dialogForm" @submit="handleSubmit(values => storage.renameFile(values, item.id))">
                               <FormField v-slot="{ componentField }" name="name">
                                 <FormItem>
                                   <FormControl>
-                                    <Input type="text" placeholder="File name" v-bind="componentField" v-model="item.name" />
+                                    <Input type="text" placeholder="File name" v-bind="componentField" :defaultValue="item.name" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -241,9 +277,10 @@ const schemaCreateFolder = toTypedSchema(z.object({
                           </DialogContent>
                         </Dialog>
                       </Form>
-
                     </DropdownMenuItem>
+
                     <DropdownMenuItem><Move /> Move</DropdownMenuItem>
+
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-red-500"> <!-- DELETE -->
                       <AlertDialog>

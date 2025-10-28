@@ -19,7 +19,7 @@ pub async fn rename_folder(
     return Err((Status::BadRequest, "No file name specified"))
   }
   let result = db
-    .query("update folders set name = $name where id = $folder_id and user_id = $user_id);")
+    .query("update folders set name = $name where id = $folder_id and user_id = $user_id;")
     .bind(("name", data.name.clone()))
     .bind(("folder_id", data.folder_id.clone()))
     .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))

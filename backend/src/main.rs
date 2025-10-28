@@ -33,7 +33,8 @@ use crate::{
                     part_info_storage::STORAGE,
                 },
                 get_objects::get_objects,
-                upload_object::upload_object
+                upload_object::upload_object,
+
             }
         }
     },
@@ -54,9 +55,10 @@ use crate::{
     }
 };
 use crate::routes::storage::folders::rename_folder::rename_folder;
-use crate::routes::storage::objects::delete_object::delete_objects;
+use crate::routes::storage::objects::delete_objects::delete_objects;
 use crate::routes::storage::objects::get_download_uri::get_download_uri;
 use crate::routes::storage::objects::multipart::abort_multipart_upload::abort_multipart_upload;
+use crate::routes::storage::objects::rename_object::rename_object;
 
 #[launch]
 async fn rocket() -> _ {
@@ -99,5 +101,6 @@ async fn rocket() -> _ {
             get_download_uri,
             delete_objects,
             rename_folder,
+            rename_object,
         ])
 }
