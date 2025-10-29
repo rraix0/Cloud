@@ -36,12 +36,12 @@ pub async fn rename_object(
 
     match result {
         Ok(_) => {
-            return Ok((Status::Ok, Json("Folder has been renamed.".to_string())));
+            return Ok((Status::Ok, Json("File has been renamed.".to_string())));
 
         },
         Err(err) => {
-            println!("Failed to create folder: {:?}", err);
-            return Err((Status::InternalServerError, "Problem creating folder"));
+            println!("Failed to rename file: {:?}", err);
+            return Err((Status::InternalServerError, "Occurred an error while  renaming file"));
         }
     };
 }

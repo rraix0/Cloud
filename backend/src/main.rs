@@ -54,9 +54,11 @@ use crate::{
         connection_minio::get_connection_minio
     }
 };
+use crate::routes::storage::folders::move_folders::move_folders;
 use crate::routes::storage::folders::rename_folder::rename_folder;
 use crate::routes::storage::objects::delete_objects::delete_objects;
 use crate::routes::storage::objects::get_download_uri::get_download_uri;
+use crate::routes::storage::objects::move_objects::move_objects;
 use crate::routes::storage::objects::multipart::abort_multipart_upload::abort_multipart_upload;
 use crate::routes::storage::objects::rename_object::rename_object;
 
@@ -102,5 +104,7 @@ async fn rocket() -> _ {
             delete_objects,
             rename_folder,
             rename_object,
+            move_objects,
+            move_folders,
         ])
 }

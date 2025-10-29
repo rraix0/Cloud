@@ -35,8 +35,8 @@ pub async fn rename_folder(
 
     },
     Err(err) => {
-      println!("Failed to create folder: {:?}", err);
-      return Err((Status::InternalServerError, "Problem creating folder"));
+      println!("Failed to rename folder: {:?}", err);
+      return Err((Status::InternalServerError, "Occurred an error while renaming folder"));
     }
   };
 }
