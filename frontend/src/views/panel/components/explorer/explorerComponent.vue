@@ -69,6 +69,7 @@ import AddNewComponent from '@/views/panel/components/small_components/addNewCom
 import * as z from 'zod'
 import ColumnsDropDownMenuComopnent from '@/views/panel/components/small_components/columnsDropDownMenuComopnent.vue'
 import UploadQueueComponent from '@/views/panel/components/small_components/uploadQueueComponent.vue'
+import SelectedItemsMenu from '@/views/panel/components/small_components/selectedItemsMenu.vue'
 
 function formatBytes(bytes:number) {
   if (bytes === 0) return '0 B';
@@ -105,11 +106,12 @@ const schemaCreateFolder = toTypedSchema(z.object({
     </div>
 
     <div class="flex items-center py-4">
+      <SelectedItemsMenu />
+
       <Input class="max-w-sm" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
       <Button variant="outline" class="ml-5" @click="() => {storage.goUp();}">
         <ChevronsUp /> Go up
       </Button>
-
 
       <addNewComponent />
 
@@ -138,9 +140,9 @@ const schemaCreateFolder = toTypedSchema(z.object({
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
+                    <!-- TABLE -->
         <TableBody>
           <template v-if="storage.folders.length > 0 || storage.files.length > 0">
-
             <!-- ================== FOLDERS ================== -->
             <TableRow v-for="(item, index) in storage.folders.filter(x => x.show !== false)" :key="index">
               <TableCell v-show="storage.headers[0]?.selected">
@@ -315,13 +317,5 @@ const schemaCreateFolder = toTypedSchema(z.object({
         </TableBody>
       </Table>
     </div>
-
-    <div class="flex items-center justify-end space-x-2 py-4">
-      <div class="flex-1 text-sm text-muted-foreground">
-        {{ storage.folders.filter((item) => item.selected === true).length + storage.files.filter((item) => item.selected === true).length }} of
-        {{ storage.folders.length + storage.files.length }} item(s) selected.
-      </div>
-    </div>
-
   </div>
 </template>

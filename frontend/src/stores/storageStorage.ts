@@ -89,7 +89,7 @@ export const useStorageStorage = defineStore('storage', () => {
   }
 
   const info_message = ref<string>()
-  const error_message = ref<string>()// TODO apply error and info message in code
+  const error_message = ref<string>()
 
   const folders = ref<Folder[]>([]);
   const files = ref<File[]>([]);
@@ -163,7 +163,12 @@ export const useStorageStorage = defineStore('storage', () => {
     ).then(res => {
       console.log(res.data);
       let link: string = res.data as string;
-      window.open(link, '_blank',  'noopener,noreferrer');
+      const a = document.createElement('a');
+      a.href = link;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }).catch(err => {
       if (err.status === 401) {
         logout()
@@ -316,8 +321,96 @@ export const useStorageStorage = defineStore('storage', () => {
     })
   }
 
+  const selectBetween = () => {
+    let is_selecting = false;
+    folders.value.forEach((object: Folder, index) => {
+      if (!is_selecting && object.selected) {
+        is_selecting = true;
+      } else if (is_selecting && object.selected) {
+        is_selecting = false;
+      } else if (is_selecting) {
+        object.selected = true;
+      }
+    })
+    files.value.forEach((object: File, index) => {
+      if (!is_selecting && object.selected) {
+        is_selecting = true;
+      } else if (is_selecting && object.selected) {
+        is_selecting = false;
+      } else if (is_selecting) {
+        object.selected = true;
+      }
+    })
+  }
+
+  const selectedDownload = async () => { // TODO Repair it later to download as zip
+    const file_ids:File[] = files.value.filter((item: File) => item.selected)
+
+    file_ids.forEach((item) => {
+      axios.post(import.meta.env.VITE_API_URL + "/storage/get_download_uri", {
+          object_id: item.id,
+        },
+        {
+          headers: {
+            Authorization: localStorage.getItem('jwt'),
+          }}
+
+      ).then(async res => {
+        console.log(res.data);
+        const presignedUrl: string = res.data;
+
+        const fileResponse = await axios.get(presignedUrl, {
+          responseType: 'blob',
+        });
+
+        const blob = fileResponse.data;
+        const blobUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = item.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(blobUrl);
+
+        //window.open(link, '_blank',  'noopener,noreferrer');
+      }).catch(err => {
+        if (err.status === 401) {
+          logout()
+        }
+        console.log(err);
+        error_message.value = err.message;
+        throw err;
+      })
+    })
+  }
+  const selectedMove = () => {
+
+  }
+  const selectedDelete = async () => {
+
+    const folders_to_delete: object[] = folders.value
+      .filter((item) => item.selected)
+      .map((item: Folder) => item.id);
+    const files_to_delete: object[] = files.value
+      .filter((item) => item.selected)
+      .map((item: File) => item.id)
+
+    if (folders_to_delete.length > 0) {
+      deleteFolders(folders_to_delete)
+      getFolders(current_folder_parent.value?.id);
+    }
+    if (files_to_delete.length > 0) {
+      deleteFiles(files_to_delete)
+      getFiles(current_folder_parent.value?.id);
+    }
+  }
+
   return { folders, files, current_folder_parent, headers, error_message, info_message,
     getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues,
-    renameFolder, renameFile
+    renameFolder, renameFile,
+    selectBetween, selectedDownload, selectedMove, selectedDelete
   }
 })

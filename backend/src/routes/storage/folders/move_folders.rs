@@ -67,17 +67,16 @@ pub async fn move_folders(
   println!("{:#?}", object_list);
 
   if object_list.iter().any(|x| data.folder_ids.contains(x)) {
-    println!("YOU ARE AN IDIOT");
+    println!("An idiot has been prevented from orphaning files. Moron's id btw: {}", auth_token.0.sub);
+    return Err((Status::BadRequest, "You can't move folder to it self."));
   }
 
 
 
-/*
-
   let result = db
-    .query("update files set parent_id = $parent_id where id in $object_ids and user_id = $user_id;")
+    .query("update folders set parent_id = $parent_id where id in $folder_ids and user_id = $user_id;")
     .bind(("parent_id", data.parent_id.clone()))
-    .bind(("object_ids", data.folder_ids.clone()))
+    .bind(("folder_ids", data.folder_ids.clone()))
     .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
     .await
     .map_err(|err| {
@@ -95,8 +94,4 @@ pub async fn move_folders(
       return Err((Status::InternalServerError, "Occurred an error while moving folder"));
     }
   };
-
-
- */
-  Ok((Status::Ok, Json("Folders has been moved.".to_string())))
 }
