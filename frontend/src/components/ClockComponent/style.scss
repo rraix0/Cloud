@@ -1,0 +1,16 @@
+:root{
+  --component-height: 100px;
+  --component-padding: 5px;
+  --component-margin: 0;
+  --component-background-color: var(--background);
+  --component-border-radius: 10px;
+  --component-border: none;
+  --digit-spacing: 15px;
+  --small-clock-background-color: var(--secondary);
+  --small-clock-margin: 1px;
+  --small-clock-border-width: 1px;
+  --small-clock-border-color: var(--border);
+  --arrow-width: 1px;
+  --arrow-background-color: var(--foreground);
+  --animation-time: 0.7s;
+}
