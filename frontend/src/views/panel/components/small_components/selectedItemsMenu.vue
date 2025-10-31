@@ -17,10 +17,9 @@ import {
 } from '@/components/ui/alert-dialog'
 
 import { useStorageStorage} from '@/stores/storageStorage.ts'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const storage = useStorageStorage();
-
-
 
 </script>
 
@@ -42,7 +41,7 @@ const storage = useStorageStorage();
         <Download /> Download
       </DropdownMenuItem>
 
-      <DropdownMenuItem><Move /> Move</DropdownMenuItem>
+      <DropdownMenuItem @click="storage.selectedToMove()"><Move /> Move</DropdownMenuItem>
 
       <DropdownMenuItem @click="storage.selectBetween()" :disabled="(storage.folders.filter((item) => item.selected === true).length + storage.files.filter((item) => item.selected === true).length) != 2">
         <SquareDashed /> Select Between
@@ -57,16 +56,18 @@ const storage = useStorageStorage();
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle class="flex gap-2"><Trash class="text-red-500" />Are you sure?</AlertDialogTitle>
-              <div class="flex flex-col" v-if="storage.folders.filter((item) => item.selected).length > 0">
-                Folders:<br>
-                <span class="text-red-500" v-for="item in storage.folders.filter((x) => x.selected)">{{item.name}}</span>
-              </div>
-              <div class="flex flex-col" v-if="storage.files.filter((item) => item.selected).length > 0">
-                Folders:<br>
-                <div class="flex flex-col">
-                  <span class="text-red-500" v-for="item in storage.files.filter((x) => x.selected)">{{item.name}}</span>
-                </div>
-              </div>
+                <ScrollArea class="h-[50vh]">
+                  <div class="flex flex-col" v-if="storage.folders.filter((item) => item.selected).length > 0">
+                    Folders:<br>
+                    <span class="text-red-500" v-for="item in storage.folders.filter((x) => x.selected)">{{item.name}}</span>
+                  </div>
+                  <div class="flex flex-col" v-if="storage.files.filter((item) => item.selected).length > 0">
+                    Files:<br>
+                    <div class="flex flex-col">
+                      <span class="text-red-500" v-for="item in storage.files.filter((x) => x.selected)">{{item.name}}</span>
+                    </div>
+                  </div>
+                </ScrollArea>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete your data!
               </AlertDialogDescription>

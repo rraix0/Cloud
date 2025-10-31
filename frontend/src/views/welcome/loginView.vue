@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { ChevronLeft } from 'lucide-vue-next'
 import axios from 'axios'
 import router from '@/router'
+import { useStorageStorage } from '@/stores/storageStorage.ts'
 
 
 const email = ref('')
@@ -26,6 +27,9 @@ const handleLogin = () => {
   })
     .then(function (response) {
       localStorage.setItem('jwt', response.data)
+      const storage = useStorageStorage();
+      storage.error_message = "";
+      storage.info_message = "";
       router.push('/panel/storage')
     })
     .catch(function (error) {

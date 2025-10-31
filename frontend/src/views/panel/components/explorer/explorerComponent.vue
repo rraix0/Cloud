@@ -60,7 +60,6 @@ const uploader_storage = useUploaderStorage()
 storage.getFolders();
 storage.getFiles();
 
-import UploadMultipartFile from '@/views/panel/components/explorer/uploadMultipartFile.vue'
 import { toTypedSchema } from '@vee-validate/zod'
 
 import { ErrorMessage } from 'vee-validate'
@@ -70,6 +69,7 @@ import * as z from 'zod'
 import ColumnsDropDownMenuComopnent from '@/views/panel/components/small_components/columnsDropDownMenuComopnent.vue'
 import UploadQueueComponent from '@/views/panel/components/small_components/uploadQueueComponent.vue'
 import SelectedItemsMenu from '@/views/panel/components/small_components/selectedItemsMenu.vue'
+import SelectedToMoveComponent from '@/views/panel/components/small_components/selectedToMoveComponent.vue'
 
 function formatBytes(bytes:number) {
   if (bytes === 0) return '0 B';
@@ -114,6 +114,8 @@ const schemaCreateFolder = toTypedSchema(z.object({
       </Button>
 
       <addNewComponent />
+
+      <SelectedToMoveComponent></SelectedToMoveComponent>
 
       <uploadQueueComponent v-if="uploader_storage.uploadQueue.length > 0" />
 
@@ -198,7 +200,7 @@ const schemaCreateFolder = toTypedSchema(z.object({
                       </Form>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem><Move /> Move</DropdownMenuItem>
+                    <DropdownMenuItem @click="() => {storage.move_objects.folders = [item]}"><Move /> Move</DropdownMenuItem>
 
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-red-500">
@@ -281,7 +283,7 @@ const schemaCreateFolder = toTypedSchema(z.object({
                       </Form>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem><Move /> Move</DropdownMenuItem>
+                    <DropdownMenuItem @click="() => {storage.move_objects.files = [item]; storage.move_objects.is_moving = true; }"><Move /> Move</DropdownMenuItem>
 
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-red-500"> <!-- DELETE -->

@@ -5,6 +5,7 @@ import axios from 'axios'
 import { logout } from '@/views/panel/functions/logout.ts'
 
 export const useStorageStorage = defineStore('storage', () => {
+  const move_objects = ref<{is_moving: boolean, files: File[], folders: Folder[]}>({is_moving: false, files: [], folders: []})
   const headers = ref([
       {
         id: 0,
@@ -386,9 +387,13 @@ export const useStorageStorage = defineStore('storage', () => {
       })
     })
   }
-  const selectedMove = () => {
 
+  const selectedToMove = () => {
+    move_objects.value.files = files.value.filter((item: File) => item.selected)
+    move_objects.value.folders = folders.value.filter((item: Folder) => item.selected)
+    move_objects.value.is_moving = true;
   }
+
   const selectedDelete = async () => {
 
     const folders_to_delete: object[] = folders.value
@@ -408,9 +413,58 @@ export const useStorageStorage = defineStore('storage', () => {
     }
   }
 
-  return { folders, files, current_folder_parent, headers, error_message, info_message,
+    const moveToDirectory = (directory: object|undefined, files: (object | undefined)[], folders: (object | undefined)[]) => {
+    move_objects.value = {is_moving: false, files: [], folders:[]}
+    if (!directory) return
+    if (files.length > 0) {
+      axios.post(import.meta.env.VITE_API_URL + "/storage/move_objects", {
+          parent_id: directory,
+          object_ids: files
+        },
+        {
+          headers: {
+            Authorization: localStorage.getItem('jwt'),
+          }}
+
+      ).then(async res => {
+        console.log(res.data);
+        getFiles(current_folder_parent.value?.id);
+      }).catch(err => {
+        if (err.status === 401) {
+          logout()
+        }
+        console.log(err);
+        error_message.value = err.message;
+        throw err;
+      })
+    }
+    if (folders.length > 0) {
+      axios.post(import.meta.env.VITE_API_URL + "/storage/move_folders", {
+          parent_id: directory,
+          folder_ids: folders
+        },
+        {
+          headers: {
+            Authorization: localStorage.getItem('jwt'),
+          }}
+      ).then(async res => {
+        console.log(res.data);
+        getFolders(current_folder_parent.value?.id);
+      }).catch(err => {
+        if (err.status === 401) {
+          logout()
+        }
+        console.log(err);
+        error_message.value = err.message;
+        throw err;
+      })
+    }
+  }
+
+
+  return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects,
     getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues,
     renameFolder, renameFile,
-    selectBetween, selectedDownload, selectedMove, selectedDelete
+    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory
   }
 })
