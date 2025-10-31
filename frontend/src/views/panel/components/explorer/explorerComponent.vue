@@ -70,6 +70,7 @@ import ColumnsDropDownMenuComopnent from '@/views/panel/components/small_compone
 import UploadQueueComponent from '@/views/panel/components/small_components/uploadQueueComponent.vue'
 import SelectedItemsMenu from '@/views/panel/components/small_components/selectedItemsMenu.vue'
 import SelectedToMoveComponent from '@/views/panel/components/small_components/selectedToMoveComponent.vue'
+import PathDirectoryComponent from '@/views/panel/components/small_components/pathDirectoryComponent.vue'
 
 function formatBytes(bytes:number) {
   if (bytes === 0) return '0 B';
@@ -93,7 +94,7 @@ const schemaCreateFolder = toTypedSchema(z.object({
 </script>
 
 <template>
-  <div class="h-full max-h-full overflow-auto p-3">
+  <div class="h-full max-h-full overflow-auto px-3">
     <div class="flex flex-col gap-2">
       <span v-if="storage.error_message" class="flex w-full border border-red-500 rounded-md p-1 text-center text-red-400 font-bold pl-3">
         {{ storage.error_message }}
@@ -125,6 +126,9 @@ const schemaCreateFolder = toTypedSchema(z.object({
 
       <ColumnsDropDownMenuComopnent />
     </div>
+
+    <PathDirectoryComponent />
+
 
     <div class="rounded-md border overflow-y-auto">
       <Table class="table-fixed w-full">

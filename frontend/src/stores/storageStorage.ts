@@ -89,11 +89,17 @@ export const useStorageStorage = defineStore('storage', () => {
     user_id: object,
   }
 
+  interface FolderTreeElement {
+    name: string,
+    id: object,
+  }
+
   const info_message = ref<string>()
   const error_message = ref<string>()
 
   const folders = ref<Folder[]>([]);
   const files = ref<File[]>([]);
+  const path = ref<FolderTreeElement[]>([])
 
   const current_folder_parent = ref<Folder>();
 
@@ -110,6 +116,7 @@ export const useStorageStorage = defineStore('storage', () => {
     ).then(res => {
       folders.value = res.data[1];
       current_folder_parent.value = res.data[0];
+      path.value = res.data[2].reverse();
       console.log(res.data);
     }).catch(err => {
       if (err.status === 401) {
@@ -145,6 +152,11 @@ export const useStorageStorage = defineStore('storage', () => {
   const goUp = () => {
     getFolders(current_folder_parent.value?.parent_id);
     getFiles(current_folder_parent.value?.parent_id);
+  };
+
+  const goTo = (id: object) => {
+    getFolders(id);
+    getFiles(id);
   };
 
   const refreshData = () => {
@@ -197,7 +209,6 @@ export const useStorageStorage = defineStore('storage', () => {
       } else {
         getFolders(undefined);
       }
-
       console.log(res.data);
     }).catch(err => {
       if (err.status === 401) {
@@ -299,8 +310,8 @@ export const useStorageStorage = defineStore('storage', () => {
       throw err;
     })
   }
-  const renameFile = (values: { name?: string }, object_id: object) => {
 
+  const renameFile = (values: { name?: string }, object_id: object) => {
     if (!values.name) return;
     axios.post(import.meta.env.VITE_API_URL + "/storage/rename_object", {
         object_id: object_id,
@@ -373,10 +384,7 @@ export const useStorageStorage = defineStore('storage', () => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-
         URL.revokeObjectURL(blobUrl);
-
-        //window.open(link, '_blank',  'noopener,noreferrer');
       }).catch(err => {
         if (err.status === 401) {
           logout()
@@ -395,7 +403,6 @@ export const useStorageStorage = defineStore('storage', () => {
   }
 
   const selectedDelete = async () => {
-
     const folders_to_delete: object[] = folders.value
       .filter((item) => item.selected)
       .map((item: Folder) => item.id);
@@ -413,7 +420,7 @@ export const useStorageStorage = defineStore('storage', () => {
     }
   }
 
-    const moveToDirectory = (directory: object|undefined, files: (object | undefined)[], folders: (object | undefined)[]) => {
+  const moveToDirectory = (directory: object|undefined, files: (object | undefined)[], folders: (object | undefined)[]) => {
     move_objects.value = {is_moving: false, files: [], folders:[]}
     if (!directory) return
     if (files.length > 0) {
@@ -462,8 +469,8 @@ export const useStorageStorage = defineStore('storage', () => {
   }
 
 
-  return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects,
-    getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues,
+  return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects, path,
+    getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues, goTo,
     renameFolder, renameFile,
     selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory
   }
