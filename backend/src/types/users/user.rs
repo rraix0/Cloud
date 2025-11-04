@@ -9,8 +9,18 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub password: String,
-    pub storage_capacity: i32,
+    pub storage_capacity: u64,
     pub jwt: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+#[derive(Clone)]
+pub struct SafeUserData {
+    pub id: Thing,
+    pub created_at: Datetime,
+    pub name: String,
+    pub email: String,
+    pub storage_capacity: u64,
 }
 
 impl User {

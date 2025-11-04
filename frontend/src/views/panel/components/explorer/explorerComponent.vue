@@ -57,8 +57,7 @@ import { useUploaderStorage} from '@/stores/uploaderStorage.ts'
 const storage = useStorageStorage()
 const uploader_storage = useUploaderStorage()
 
-storage.getFolders();
-storage.getFiles();
+
 
 import { toTypedSchema } from '@vee-validate/zod'
 

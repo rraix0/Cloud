@@ -61,6 +61,8 @@ use crate::routes::storage::objects::get_download_uri::get_download_uri;
 use crate::routes::storage::objects::move_objects::move_objects;
 use crate::routes::storage::objects::multipart::abort_multipart_upload::abort_multipart_upload;
 use crate::routes::storage::objects::rename_object::rename_object;
+use crate::routes::users::edit_user::edit_user;
+use crate::routes::users::get_user_info::get_user_info;
 
 #[launch]
 async fn rocket() -> _ {
@@ -90,7 +92,9 @@ async fn rocket() -> _ {
         .manage(client)
         .mount("/api", routes![
             login,
+            edit_user,
             register,
+            get_user_info,
             create_folder,
             get_folders,
             delete_folders,
