@@ -1,7 +1,10 @@
 import axios from 'axios'
 import type { FileObject } from '@/stores/uploaderStorage.ts'
+import { useStorageStorage} from '@/stores/storageStorage.ts'
+
 
 export const uploadMultipartFile = async (item: FileObject) => {
+  const storage = useStorageStorage()
   const chunkSize = 16 * 1024 * 1024 // 16 MB
   let file = item.file
   const title = item.file.name
@@ -13,7 +16,8 @@ export const uploadMultipartFile = async (item: FileObject) => {
   formData1.append('folder', JSON.stringify(item.parent_id))
   formData1.append('size', String(item.file.size))
 
-  const initResponse = await axios.post(
+  let initResponse;
+   await axios.post(
     import.meta.env.VITE_API_URL + '/storage/create_multipart_upload',
     formData1,
     {
@@ -22,8 +26,14 @@ export const uploadMultipartFile = async (item: FileObject) => {
         Authorization: localStorage.getItem('jwt'),
       },
     },
-  )
-  const uploadId = initResponse.data
+  ).then((response) => {
+    initResponse = response.data
+   }).catch((err) => {
+     item.errorMessage = err.response.data;
+     storage.error_message = err.response.data;
+   })
+  const uploadId = initResponse;
+  if (!uploadId) return;
 
   // STEP 2
   for (let i = 0; i < totalChunks; i++) {
@@ -66,6 +76,6 @@ export const uploadMultipartFile = async (item: FileObject) => {
     item.upload_progress = 100;
     item.upload_status = "done"
   }).catch((err) => {
-    item.errorMessage = err.message;
+    item.errorMessage = err.response.data;
   })
 }

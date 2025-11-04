@@ -163,7 +163,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
-      error_message.value = err.message;
+      error_message.value = err.response.data;
       console.log(err);
     })
   }
@@ -186,7 +186,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
-      error_message.value = err.message;
+      error_message.value = err.response.data;
       console.log(err);
     })
   }
@@ -229,7 +229,7 @@ export const useStorageStorage = defineStore('storage', () => {
         logout()
       }
       console.log(err);
-      error_message.value = err.message;
+      error_message.value = err.response.data;
       throw err;
     })
   }
@@ -256,7 +256,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
-      error_message.value = err.message;
+      error_message.value = err.response.data;
       console.log(err);
       throw err;
     })
@@ -280,7 +280,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
-      error_message.value = err.message;
+      error_message.value = err.response.data;
       console.log(err);
       throw err;
     })
@@ -303,7 +303,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
-      error_message.value = err.message;
+      error_message.value = err.response.data;
       console.log(err);
       throw err;
     })
@@ -347,7 +347,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
-      error_message.value = err.message;
+      error_message.value = err.response.data;
       console.log(err);
       throw err;
     })
@@ -369,7 +369,7 @@ export const useStorageStorage = defineStore('storage', () => {
       if (err.status === 401) {
         logout()
       }
-      error_message.value = err.message;
+      error_message.value = err.response.data;
       console.log(err);
       throw err;
     })
@@ -432,7 +432,7 @@ export const useStorageStorage = defineStore('storage', () => {
           logout()
         }
         console.log(err);
-        error_message.value = err.message;
+        error_message.value = err.response.data;
         throw err;
       })
     })
@@ -483,7 +483,7 @@ export const useStorageStorage = defineStore('storage', () => {
           logout()
         }
         console.log(err);
-        error_message.value = err.message;
+        error_message.value = err.response.data;
         throw err;
       })
     }
@@ -504,7 +504,7 @@ export const useStorageStorage = defineStore('storage', () => {
           logout()
         }
         console.log(err);
-        error_message.value = err.message;
+        error_message.value = err.response.data;
         throw err;
       })
     }

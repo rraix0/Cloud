@@ -26,11 +26,32 @@ pub struct CreateMultipartUpload {
 
 #[post("/storage/create_multipart_upload", data = "<form>")]
 pub async fn create_multipart_upload(
-    _db: &State<Arc<Surreal<Any>>>,
+    db: &State<Arc<Surreal<Any>>>,
     client: &State<Arc<Client>>,
     form: Form<CreateMultipartUpload>,
     auth_token: AuthToken,
 ) -> Result<(Status, Json<String>), (Status, &'static str)> {
+    // Check storage capacity
+    let mut actual_files_size_response = db
+        .query("RETURN [math::sum((select size from files where $user_id).size), (select storage_capacity from $user_id).storage_capacity[0]];")
+        .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
+        .await
+        .map_err(|err| {
+            eprintln!("Occurred an error while trying to remove file after db error: {:?}", err);
+            (Status::InternalServerError, "Couldn't check storage capacity!")
+        })?;
+
+    let actual_files_size: [u64; 2] = match actual_files_size_response.take::<Vec<u64>>(0) {
+        Ok(size) => {
+            size.try_into().unwrap()
+        },
+        Err(_) => {
+            return Err((Status::InternalServerError, "Couldn't parse storage capacity!"));
+        }
+    };
+    if actual_files_size[0] + form.size > actual_files_size[1] {
+        return Err((Status::BadRequest, "You don't have enough space!"));
+    } // END
     
     let file_id = Uuid::now_v7();
     let key = format!("{}/{}", auth_token.0.sub , file_id);

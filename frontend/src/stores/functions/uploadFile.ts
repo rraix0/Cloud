@@ -1,8 +1,9 @@
 import axios from 'axios'
 import type { FileObject } from '@/stores/uploaderStorage.ts'
+import { useStorageStorage} from '@/stores/storageStorage.ts'
 
 export const uploadFile = async (item: FileObject) => {
-
+  const storage = useStorageStorage()
   const formData = new FormData();
   formData.append('file', item.file);
   formData.append('title', item.file.name);
@@ -24,7 +25,9 @@ export const uploadFile = async (item: FileObject) => {
     item.upload_progress = 100;
     item.upload_status = "done"
   }).catch((err) => {
-    item.errorMessage = err.message;
+    console.log(err)
+    item.errorMessage = err.response.data;
+    storage.error_message = err.response.data;
   })
 
 }
