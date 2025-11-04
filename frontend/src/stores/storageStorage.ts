@@ -1,12 +1,47 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ArrowDownUp } from 'lucide-vue-next'
+import { ArrowDownUp, ArrowUpWideNarrow, ArrowDownWideNarrow } from 'lucide-vue-next'
 import axios from 'axios'
 import { logout } from '@/views/panel/functions/logout.ts'
 
 export const useStorageStorage = defineStore('storage', () => {
   const move_objects = ref<{is_moving: boolean, files: File[], folders: Folder[]}>({is_moving: false, files: [], folders: []})
-  const headers = ref([
+
+  const sorted_by = ref<SortedBy>('name');
+  const sortValues = (sort_by: SortedBy) => {
+    switch (sort_by) {
+      case 'name':
+        folders.value = folders.value.sort((a:Folder, b:Folder) => a.name.localeCompare(b.name));
+        files.value = files.value.sort((a:File, b:File) => a.name.localeCompare(b.name));
+        sorted_by.value = 'name'
+        break;
+      case 'r_name':
+        folders.value = folders.value.sort((a:Folder, b:Folder) => b.name.localeCompare(a.name));
+        files.value = files.value.sort((a:File, b:File) => b.name.localeCompare(a.name));
+        sorted_by.value = 'r_name'
+        break;
+      case 'date':
+        folders.value = folders.value.sort((a:Folder, b:Folder) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        files.value = files.value.sort((a:File, b:File) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        sorted_by.value = 'date'
+        break;
+      case 'r_date':
+        folders.value = folders.value.sort((a:Folder, b:Folder) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        files.value = files.value.sort((a:File, b:File) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        sorted_by.value = 'r_date'
+        break;
+      case 'size':
+        files.value = files.value.sort((a:File, b:File) => a.size - b.size);
+        sorted_by.value = 'size'
+        break;
+      case 'r_size':
+        files.value = files.value.sort((a:File, b:File) => b.size - a.size);
+        sorted_by.value = 'r_size'
+        break;
+    }
+
+  }
+  const headers = computed(() => [
       {
         id: 0,
         name: 'Select',
@@ -26,24 +61,27 @@ export const useStorageStorage = defineStore('storage', () => {
         name: 'Name',
         col_type: 3,
         style: "w-100",
-        icon: ArrowDownUp,
+        icon: sorted_by.value == 'name' ? ArrowUpWideNarrow : sorted_by.value == 'r_name' ? ArrowDownWideNarrow : ArrowDownUp,
         selected: true,
+        action: () => sorted_by.value == 'name'?  sortValues('r_name'): sortValues('name'),
       },
       {
         id: 3,
         name: 'date',
         col_type: 3,
         style: "w-25",
-        icon: ArrowDownUp,
+        icon: sorted_by.value == 'date' ? ArrowUpWideNarrow : sorted_by.value == 'r_date' ? ArrowDownWideNarrow : ArrowDownUp,
         selected: true,
+        action: () => sorted_by.value == 'date'?  sortValues('r_date'): sortValues('date'),
       },
       {
         id: 4,
         name: 'size',
         col_type: 3,
         style: "w-25",
-        icon: ArrowDownUp,
+        icon: sorted_by.value == 'size' ? ArrowUpWideNarrow : sorted_by.value == 'r_size' ? ArrowDownWideNarrow : ArrowDownUp,
         selected: true,
+        action: () => sorted_by.value == 'size'?  sortValues('r_size'): sortValues('size'),
       },
       {
       id: 5,
@@ -89,6 +127,8 @@ export const useStorageStorage = defineStore('storage', () => {
     user_id: object,
   }
 
+  type SortedBy = 'name' | 'r_name' | 'date' | 'r_date' | 'size' | 'r_size';
+
   interface FolderTreeElement {
     name: string,
     id: object,
@@ -115,6 +155,7 @@ export const useStorageStorage = defineStore('storage', () => {
 
     ).then(res => {
       folders.value = res.data[1];
+      sortValues(sorted_by.value);
       current_folder_parent.value = res.data[0];
       path.value = res.data[2].reverse();
       console.log(res.data);
@@ -139,6 +180,7 @@ export const useStorageStorage = defineStore('storage', () => {
 
     ).then(res => {
       files.value = res.data;
+      sortValues(sorted_by.value);
       console.log(res.data);
     }).catch(err => {
       if (err.status === 401) {
@@ -471,9 +513,9 @@ export const useStorageStorage = defineStore('storage', () => {
   getFolders();
   getFiles();
 
-  return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects, path,
+  return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects, path, sorted_by,
     getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues, goTo,
     renameFolder, renameFile,
-    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory
+    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory, sortValues
   }
 })
