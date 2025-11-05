@@ -30,6 +30,10 @@ const handleRegister = () => {
     password: password.value,
   }).then((response) => {
     localStorage.setItem('jwt', response.data)
+    storage.error_message = "";
+    storage.info_message = "";
+    storage.getFolders();
+    storage.getFiles();
     router.push('/panel/storage')
   })
 }

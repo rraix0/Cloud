@@ -30,6 +30,8 @@ const handleLogin = () => {
       const storage = useStorageStorage();
       storage.error_message = "";
       storage.info_message = "";
+      storage.getFolders();
+      storage.getFiles();
       router.push('/panel/storage')
     })
     .catch(function (error) {
