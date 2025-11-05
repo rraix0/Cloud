@@ -141,7 +141,7 @@ const schemaCreateFolder = toTypedSchema(z.object({
                 <Checkbox v-model="allSelected" v-if="item.col_type === 2" />
                 <Button variant="ghost" v-if="item.col_type === 3" @click="item.action?.()">
                   {{ item.name }}
-                  <component :is="item.icon" />
+                  <component :is="item.icon()" />
                 </Button>
             </TableHead>
             <TableHead></TableHead>

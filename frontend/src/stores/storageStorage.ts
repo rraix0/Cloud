@@ -41,7 +41,7 @@ export const useStorageStorage = defineStore('storage', () => {
     }
 
   }
-  const headers = computed(() => [
+  const headers = ref([
       {
         id: 0,
         name: 'Select',
@@ -61,7 +61,13 @@ export const useStorageStorage = defineStore('storage', () => {
         name: 'Name',
         col_type: 3,
         style: "w-100",
-        icon: sorted_by.value == 'name' ? ArrowUpWideNarrow : sorted_by.value == 'r_name' ? ArrowDownWideNarrow : ArrowDownUp,
+        icon: () => {
+          return sorted_by.value == 'name'
+            ? ArrowUpWideNarrow
+            : sorted_by.value == 'r_name'
+              ? ArrowDownWideNarrow
+              : ArrowDownUp
+        },
         selected: true,
         action: () => sorted_by.value == 'name'?  sortValues('r_name'): sortValues('name'),
       },
@@ -70,7 +76,7 @@ export const useStorageStorage = defineStore('storage', () => {
         name: 'date',
         col_type: 3,
         style: "w-25",
-        icon: sorted_by.value == 'date' ? ArrowUpWideNarrow : sorted_by.value == 'r_date' ? ArrowDownWideNarrow : ArrowDownUp,
+        icon: () => {return sorted_by.value == 'date' ? ArrowUpWideNarrow : sorted_by.value == 'r_date' ? ArrowDownWideNarrow : ArrowDownUp} ,
         selected: true,
         action: () => sorted_by.value == 'date'?  sortValues('r_date'): sortValues('date'),
       },
@@ -79,7 +85,7 @@ export const useStorageStorage = defineStore('storage', () => {
         name: 'size',
         col_type: 3,
         style: "w-25",
-        icon: sorted_by.value == 'size' ? ArrowUpWideNarrow : sorted_by.value == 'r_size' ? ArrowDownWideNarrow : ArrowDownUp,
+        icon: () => {return sorted_by.value == 'size' ? ArrowUpWideNarrow : sorted_by.value == 'r_size' ? ArrowDownWideNarrow : ArrowDownUp},
         selected: true,
         action: () => sorted_by.value == 'size'?  sortValues('r_size'): sortValues('size'),
       },
