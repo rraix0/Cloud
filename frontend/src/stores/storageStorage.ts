@@ -39,7 +39,6 @@ export const useStorageStorage = defineStore('storage', () => {
         sorted_by.value = 'r_size'
         break;
     }
-
   }
   const headers = ref([
       {
@@ -131,6 +130,7 @@ export const useStorageStorage = defineStore('storage', () => {
     tags: string[],
     updated_at: Date,
     user_id: object,
+    thumbnail: any, // change it to bytes
   }
 
   type SortedBy = 'name' | 'r_name' | 'date' | 'r_date' | 'size' | 'r_size';

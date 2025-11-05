@@ -1,6 +1,11 @@
 use std::env;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
 use std::sync::Arc;
 use aws_sdk_s3::{Client, primitives::ByteStream};
+use image::ImageFormat;
+use image::imageops::FilterType;
 use rocket::{post, FromForm, State, form::Form};
 use rocket::fs::TempFile;
 use rocket::http::Status;
@@ -8,6 +13,8 @@ use rocket::serde::json::Json;
 use surrealdb::{Surreal, engine::any::Any};
 use surrealdb::sql::Thing;
 use uuid::Uuid;
+use webp::{Encoder, WebPMemory};
+use crate::routes::storage::objects::functions::get_thumbnail::get_thumbnail;
 use crate::types::auth_type::{AuthToken};
 
 #[derive(FromForm, Debug)]
@@ -48,6 +55,14 @@ pub async fn upload_object<'a>(
 
     println!("{:?}, {:?}", form.file.name(), form.file.content_type());
     println!("{:?}", form.file.path().clone());
+
+        // THUMBNAIL
+
+    //Format
+let img_vec = get_thumbnail(form.title.clone(), form.file.path());
+
+println!("FINAL: {:?}", img_vec);
+
 
     let path = form.file.path();
 
