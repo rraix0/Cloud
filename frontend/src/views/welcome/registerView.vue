@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { ChevronLeft } from 'lucide-vue-next'
 import axios from 'axios'
 import router from '@/router'
+import { useStorageStorage } from '@/stores/storageStorage.ts'
 
 const email = ref('')
 const name = ref('')
@@ -30,6 +31,7 @@ const handleRegister = () => {
     password: password.value,
   }).then((response) => {
     localStorage.setItem('jwt', response.data)
+    const storage = useStorageStorage();
     storage.error_message = "";
     storage.info_message = "";
     storage.getFolders();

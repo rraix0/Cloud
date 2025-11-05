@@ -3,6 +3,7 @@ import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Spinner } from '@/components/ui/spinner'
 import {
   Dialog,
   DialogContent,
@@ -316,6 +317,12 @@ const schemaCreateFolder = toTypedSchema(z.object({
             </TableRow>
 
           </template>
+
+          <TableRow v-else-if="storage.is_waiting_for_server">
+            <TableCell :colspan="storage.headers.length" class="h-24 text-center">
+              <div class="flex justify-center items-center gap-2">Loading data <Spinner class="size-6" /></div>
+            </TableCell>
+          </TableRow>
 
           <TableRow v-else>
             <TableCell :colspan="storage.headers.length" class="h-24 text-center"> No results. </TableCell>

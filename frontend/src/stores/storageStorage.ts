@@ -137,6 +137,7 @@ export const useStorageStorage = defineStore('storage', () => {
   const info_message = ref<string>()
   const error_message = ref<string>()
 
+  const is_waiting_for_server = ref<boolean>(false)
   const folders = ref<Folder[]>([]);
   const files = ref<File[]>([]);
   const path = ref<FolderTreeElement[]>([])
@@ -144,6 +145,8 @@ export const useStorageStorage = defineStore('storage', () => {
   const current_folder_parent = ref<Folder>();
 
   const getFolders = (parent_id: object | undefined = undefined) => {
+
+    is_waiting_for_server.value = true
     folders.value = [];
     axios.post(import.meta.env.VITE_API_URL + "/storage/get_folders", {
         parent_id: parent_id,
@@ -159,16 +162,19 @@ export const useStorageStorage = defineStore('storage', () => {
       current_folder_parent.value = res.data[0];
       path.value = res.data[2].reverse();
       console.log(res.data);
+      is_waiting_for_server.value = false
     }).catch(err => {
       if (err.status === 401) {
         logout()
       }
       error_message.value = err.response.data;
       console.log(err);
+      is_waiting_for_server.value = false
     })
   }
 
   const getFiles = (parent_id: object | undefined = undefined) => {
+    is_waiting_for_server.value = true
     files.value = [];
     axios.post(import.meta.env.VITE_API_URL + "/storage/get_objects", {
         parent_id: parent_id,
@@ -182,12 +188,14 @@ export const useStorageStorage = defineStore('storage', () => {
       files.value = res.data;
       sortValues(sorted_by.value);
       console.log(res.data);
+      is_waiting_for_server.value = false
     }).catch(err => {
       if (err.status === 401) {
         logout()
       }
       error_message.value = err.response.data;
       console.log(err);
+      is_waiting_for_server.value = false
     })
   }
 
@@ -513,7 +521,7 @@ export const useStorageStorage = defineStore('storage', () => {
   getFolders();
   getFiles();
 
-  return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects, path, sorted_by,
+  return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects, path, sorted_by, is_waiting_for_server,
     getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues, goTo,
     renameFolder, renameFile,
     selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory, sortValues
