@@ -11,6 +11,7 @@ use rocket::fs::TempFile;
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use surrealdb::{Surreal, engine::any::Any};
+use surrealdb::sql::Bytes;
 use surrealdb::sql::Thing;
 use uuid::Uuid;
 use webp::{Encoder, WebPMemory};
@@ -59,10 +60,16 @@ pub async fn upload_object<'a>(
         // THUMBNAIL
 
     //Format
-let img_vec = get_thumbnail(form.title.clone(), form.file.path());
-
-println!("FINAL: {:?}", img_vec);
-
+    let img_bytes:Option<Bytes> =  match get_thumbnail(form.title.clone(), form.file.path()) {
+        Ok(img_vec) => {
+            println!("{:?}", img_vec);
+            let img_bytes: Bytes = Bytes::from(img_vec);
+            Some(img_bytes)
+        }
+        Err(_) => {
+            None
+        }
+    };
 
     let path = form.file.path();
 
@@ -83,14 +90,15 @@ println!("FINAL: {:?}", img_vec);
 
     let resp = db
         .query("insert into files
-                (id, user_id, object_id, name, size, created_at, parent_id)
-                values ($id, $user_id, $object_id, $name, $size, time::now(), $parent_id);")
+                (id, user_id, object_id, name, size, created_at, parent_id, thumbnail)
+                values ($id, $user_id, $object_id, $name, $size, time::now(), $parent_id, $thumbnail);")
         .bind(("id", object_id.to_string().clone()))
         .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
         .bind(("object_id", object_id.to_string().clone()))
         .bind(("name", form.title.clone()))
         .bind(("size", size.clone()))
         .bind(("parent_id", form.folder.clone().into_inner() ))
+        .bind(("thumbnail", img_bytes))
         .await;
 
 

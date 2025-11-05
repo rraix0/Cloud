@@ -1,6 +1,6 @@
 use rocket::serde::{Deserialize, Serialize};
 use surrealdb::Datetime;
-use surrealdb::sql::{Object, Thing};
+use surrealdb::sql::{Bytes, Object, Thing};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct ObjectType {
@@ -14,6 +14,7 @@ pub struct ObjectType {
     pub tags: Option<Vec<String>>,
     pub updated_at: Option<Datetime>,
     pub user_id: Thing,
+    pub thumbnail: Option<Bytes>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

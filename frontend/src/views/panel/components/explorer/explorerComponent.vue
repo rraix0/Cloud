@@ -141,7 +141,7 @@ const schemaCreateFolder = toTypedSchema(z.object({
                 <Checkbox v-model="allSelected" v-if="item.col_type === 2" />
                 <Button variant="ghost" v-if="item.col_type === 3" @click="item.action?.()">
                   {{ item.name }}
-                  <component :is="item.icon()" />
+                  <component v-if="item.icon" :is="item.icon()" />
                 </Button>
             </TableHead>
             <TableHead></TableHead>
@@ -239,7 +239,14 @@ const schemaCreateFolder = toTypedSchema(z.object({
                 <Checkbox v-model="item.selected" />
               </TableCell>
               <TableCell v-show="storage.headers[1]?.selected">
-                <File />
+                <img
+                  v-if="item.thumbnail"
+                  :src="item.thumbnail"
+                  alt="thumbnail"
+                  class="thumbnail"
+                />
+                <File v-else />
+
               </TableCell>
               <TableCell v-show="storage.headers[2]?.selected">{{ item.name }}</TableCell>
               <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
