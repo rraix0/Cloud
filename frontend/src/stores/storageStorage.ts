@@ -52,7 +52,7 @@ export const useStorageStorage = defineStore('storage', () => {
         id: 1,
         name: 'Icon',
         col_type: 1,
-        style: "w-10",
+        style: "w-[50px]",
         selected: true,
       },
       {
@@ -130,7 +130,7 @@ export const useStorageStorage = defineStore('storage', () => {
     tags: string[],
     updated_at: Date,
     user_id: object,
-    thumbnail: any, // change it to bytes
+    thumbnail: any[][] | null, // change it to bytes
   }
 
   type SortedBy = 'name' | 'r_name' | 'date' | 'r_date' | 'size' | 'r_size';

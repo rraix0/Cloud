@@ -91,6 +91,13 @@ const schemaCreateFolder = toTypedSchema(z.object({
   name: z.string().min(2).max(50),
 }));
 
+const getImgFromBase64 = (thumbnail: any) => {
+  const uint8Array = new Uint8Array(thumbnail)
+  const blob = new Blob([uint8Array], { type: 'image/webp' })
+  return URL.createObjectURL(blob)
+}
+
+
 </script>
 
 <template>
@@ -238,14 +245,14 @@ const schemaCreateFolder = toTypedSchema(z.object({
               <TableCell v-show="storage.headers[0]?.selected" >
                 <Checkbox v-model="item.selected" />
               </TableCell>
-              <TableCell v-show="storage.headers[1]?.selected">
+              <TableCell v-show="storage.headers[1]?.selected" class="p-0">
                 <img
                   v-if="item.thumbnail"
-                  :src="item.thumbnail"
+                  :src="getImgFromBase64(item.thumbnail)"
                   alt="thumbnail"
-                  class="thumbnail"
+                  class="thumbnail h-[50px] w-[50px]"
                 />
-                <File v-else />
+                <File class="ml-2" v-else />
 
               </TableCell>
               <TableCell v-show="storage.headers[2]?.selected">{{ item.name }}</TableCell>

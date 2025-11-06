@@ -5,7 +5,7 @@ use std::path::Path;
 use std::sync::Arc;
 use aws_sdk_s3::{Client, primitives::ByteStream};
 use image::ImageFormat;
-use image::imageops::FilterType;
+use image::imageops::{thumbnail, FilterType};
 use rocket::{post, FromForm, State, form::Form};
 use rocket::fs::TempFile;
 use rocket::http::Status;
@@ -15,12 +15,13 @@ use surrealdb::sql::Bytes;
 use surrealdb::sql::Thing;
 use uuid::Uuid;
 use webp::{Encoder, WebPMemory};
-use crate::routes::storage::objects::functions::get_thumbnail::get_thumbnail;
 use crate::types::auth_type::{AuthToken};
 
 #[derive(FromForm, Debug)]
 pub struct UploadObject<'a> {
     file: TempFile<'a>,
+    #[field(name = "thumbnail", validate = len(..3_000))]
+    thumbnail: Option<Json<Vec<u8>>>,
     title: String,
     folder: Json<Thing>,
 }
@@ -57,23 +58,24 @@ pub async fn upload_object<'a>(
     println!("{:?}, {:?}", form.file.name(), form.file.content_type());
     println!("{:?}", form.file.path().clone());
 
-        // THUMBNAIL
-
-    //Format
-    let img_bytes:Option<Bytes> =  match get_thumbnail(form.title.clone(), form.file.path()) {
-        Ok(img_vec) => {
-            println!("{:?}", img_vec);
-            let img_bytes: Bytes = Bytes::from(img_vec);
-            Some(img_bytes)
-        }
-        Err(_) => {
-            None
-        }
-    };
-
     let path = form.file.path();
 
     let stream_bytes = ByteStream::from_path(path.unwrap()).await.unwrap();
+    //thumbnail:
+
+    let thumbnail:Option<Bytes> = match &form.thumbnail{
+        Some(thumbnail) => {
+            println!("JEST THUMBNAIL");
+            let bytes: Vec<u8> = thumbnail.clone().into_inner();
+            println!("{}", bytes.len());
+
+            let bytes:Bytes = Bytes::from(bytes);
+            Some(bytes)
+        }
+        None => None
+    };
+
+
 
     let object_id = Uuid::now_v7();
     let size = form.file.len();
@@ -98,7 +100,7 @@ pub async fn upload_object<'a>(
         .bind(("name", form.title.clone()))
         .bind(("size", size.clone()))
         .bind(("parent_id", form.folder.clone().into_inner() ))
-        .bind(("thumbnail", img_bytes))
+        .bind(("thumbnail", thumbnail))
         .await;
 
 
