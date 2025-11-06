@@ -282,7 +282,7 @@ export const useStorageStorage = defineStore('storage', () => {
     })
   }
 
-  function deleteFolders(folder_ids: object[]) {
+  function deleteFolders(folder_ids: Thing[]) {
     axios.post(import.meta.env.VITE_API_URL + "/storage/delete_folders", {
         folders_ids: folder_ids,
       },
@@ -308,7 +308,7 @@ export const useStorageStorage = defineStore('storage', () => {
     })
   }
 
-  function deleteFiles(file_ids: object[]) {
+  function deleteFiles(file_ids: Thing[]) {
     axios.post(import.meta.env.VITE_API_URL + "/storage/delete_objects", {
         object_ids: file_ids,
       },
@@ -317,7 +317,8 @@ export const useStorageStorage = defineStore('storage', () => {
           Authorization: localStorage.getItem('jwt'),
         }}
     ).then(_ => {
-      files.value = files.value.filter((item: File) => !file_ids.includes(item.id));
+      let file_ids_strings: string[] = file_ids.map(item => item.id.String);
+      files.value = files.value.filter((item: File) => !file_ids_strings.includes(item.id.id.String));
       sortValues(sorted_by.value);
     }).catch(err => {
       if (err.status === 401) {
@@ -472,10 +473,10 @@ export const useStorageStorage = defineStore('storage', () => {
   }
 
   const selectedDelete = async () => {
-    const folders_to_delete: object[] = folders.value
+    const folders_to_delete: Thing[] = folders.value
       .filter((item) => item.selected)
       .map((item: Folder) => item.id);
-    const files_to_delete: object[] = files.value
+    const files_to_delete: Thing[] = files.value
       .filter((item) => item.selected)
       .map((item: File) => item.id)
 
