@@ -4,13 +4,13 @@ use surrealdb::sql::{Thing};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Folder {
-    created_at: Datetime,
-    parent_id: Option<Thing>,
-    id: Thing,
-    name: String,
-    share_id: Option<Vec<Thing>>,
-    updated_at: Option<Datetime>,
-    user_id: Thing,
+    pub created_at: Datetime,
+    pub parent_id: Option<Thing>,
+    pub id: Thing,
+    pub name: String,
+    pub share_id: Option<Vec<Thing>>,
+    pub updated_at: Option<Datetime>,
+    pub user_id: Thing,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

@@ -170,7 +170,7 @@ const getImgFromBase64 = (thumbnail: any) => {
               <TableCell v-show="storage.headers[4]?.selected">{{  }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
               <TableCell v-show="storage.headers[6]?.selected">
-                <DropdownMenu>
+                <DropdownMenu v-model:open="item.open_dropdown_menu">
                   <DropdownMenuTrigger>
                     <Menu />
                   </DropdownMenuTrigger>
@@ -187,7 +187,7 @@ const getImgFromBase64 = (thumbnail: any) => {
                             <DialogHeader>
                               <DialogTitle>Rename file</DialogTitle>
                             </DialogHeader>
-                            <form id="dialogForm" @submit="handleSubmit(values => storage.renameFolder(values, item.id))">
+                            <form id="dialogForm" @submit.prevent="handleSubmit(values => storage.renameFolder(values, item.id))">
                               <FormField v-slot="{ componentField }" name="name">
                                 <FormItem>
                                   <FormControl>
@@ -199,10 +199,12 @@ const getImgFromBase64 = (thumbnail: any) => {
                             </form>
                             <DialogFooter>
                               <DialogClose>
-                                <Button variant="outline">Cancel</Button>
+                                <Button variant="outline" @click="item.open_dropdown_menu = false">
+                                  Cancel
+                                </Button>
                               </DialogClose>
                               <DialogClose>
-                                <Button type="submit" form="dialogForm">
+                                <Button type="submit" form="dialogForm" @click="item.open_dropdown_menu = false">
                                   Submit
                                 </Button>
                               </DialogClose>
@@ -210,6 +212,7 @@ const getImgFromBase64 = (thumbnail: any) => {
                           </DialogContent>
                         </Dialog>
                       </Form>
+
                     </DropdownMenuItem>
 
                     <DropdownMenuItem @click="() => {storage.move_objects.folders = [item]}"><Move /> Move</DropdownMenuItem>
@@ -285,7 +288,7 @@ const getImgFromBase64 = (thumbnail: any) => {
               <TableCell v-show="storage.headers[4]?.selected">{{ formatBytes(item.size) }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
               <TableCell v-show="storage.headers[6]?.selected">
-                <DropdownMenu>
+                <DropdownMenu v-model:open="item.open_dropdown_menu">
                   <DropdownMenuTrigger>
                     <Menu />
                   </DropdownMenuTrigger>
@@ -302,7 +305,7 @@ const getImgFromBase64 = (thumbnail: any) => {
                             <DialogHeader>
                               <DialogTitle>Rename file</DialogTitle>
                             </DialogHeader>
-                            <form id="dialogForm" @submit="handleSubmit(values => storage.renameFile(values, item.id))">
+                            <form id="dialogForm" @submit.prevent="handleSubmit(values => storage.renameFile(values, item.id))">
                               <FormField v-slot="{ componentField }" name="name">
                                 <FormItem>
                                   <FormControl>
@@ -314,10 +317,12 @@ const getImgFromBase64 = (thumbnail: any) => {
                             </form>
                             <DialogFooter>
                               <DialogClose>
-                                <Button variant="outline">Cancel</Button>
+                                <Button variant="outline" @click="item.open_dropdown_menu = false">
+                                  Cancel
+                                </Button>
                               </DialogClose>
                               <DialogClose>
-                                <Button type="submit" form="dialogForm">
+                                <Button type="submit" form="dialogForm" @click="item.open_dropdown_menu = false">
                                   Submit
                                 </Button>
                               </DialogClose>

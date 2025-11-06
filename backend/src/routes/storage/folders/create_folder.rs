@@ -47,7 +47,5 @@ values ($id, time::now(), $parent_id, $name, $user_id);")
         }
     };
 
-
-
     Ok((Status::Ok , Json(folder)))
 }

@@ -42,7 +42,7 @@ pub async fn login(
     };
 
     let claims: Claims = Claims{
-        exp: (Utc::now() + Duration::hours(24)).timestamp() as usize,
+        exp: (Utc::now() + Duration::days(7)).timestamp() as usize,
         sub: user.id.id.to_raw(),
         sub_jwt: user.jwt
     };

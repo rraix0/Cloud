@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, isProxy, ref, toRaw, toRefs } from 'vue'
 import { defineStore } from 'pinia'
 import { ArrowDownUp, ArrowUpWideNarrow, ArrowDownWideNarrow } from 'lucide-vue-next'
 import axios from 'axios'
@@ -105,31 +105,40 @@ export const useStorageStorage = defineStore('storage', () => {
     ],
   )
 
+  interface Thing {
+    id: {
+      String: string
+    },
+    tb: string,
+  }
+
   interface Folder {
+    open_dropdown_menu: boolean,
     selected: boolean,
     show: boolean,
     created_at: Date,
-    id: object,
+    id: Thing,
     name: string,
-    parent_id: object,
+    parent_id: Thing,
     share_id: [object],
     updated_at: Date,
-    user_id: object,
+    user_id: Thing,
   }
 
   interface File {
+    open_dropdown_menu: boolean,
     selected: boolean,
     show: boolean,
     created_at: Date,
-    id: object,
+    id: Thing,
     metadata: object,
     name: string,
-    parent_id: object,
+    parent_id: Thing,
     share_id: [object],
     size: number,
     tags: string[],
     updated_at: Date,
-    user_id: object,
+    user_id: Thing,
     thumbnail: any[][] | null, // change it to bytes
   }
 
@@ -137,7 +146,7 @@ export const useStorageStorage = defineStore('storage', () => {
 
   interface FolderTreeElement {
     name: string,
-    id: object,
+    id: Thing,
   }
 
   const info_message = ref<string>()
@@ -260,11 +269,8 @@ export const useStorageStorage = defineStore('storage', () => {
           Authorization: localStorage.getItem('jwt'),
         }}
     ).then(res => {
-      if (current_folder_parent.value) {
-        getFolders(current_folder_parent.value.id);
-      } else {
-        getFolders(undefined);
-      }
+      folders.value.push(res.data);
+      sortValues(sorted_by.value);
       console.log(res.data);
     }).catch(err => {
       if (err.status === 401) {
@@ -276,20 +282,22 @@ export const useStorageStorage = defineStore('storage', () => {
     })
   }
 
-  function deleteFolders(folder_id: object[]) {
+  function deleteFolders(folder_ids: object[]) {
     axios.post(import.meta.env.VITE_API_URL + "/storage/delete_folders", {
-        folders_ids: folder_id,
+        folders_ids: folder_ids,
       },
       {
         headers: {
           Authorization: localStorage.getItem('jwt'),
         }}
     ).then(res => {
-      if (current_folder_parent.value) {
-        getFolders(current_folder_parent.value.id);
-      } else {
-        getFolders(undefined);
+      let response:Thing[] = res.data;
+      let response_ids: string[] = response.map(item => item.id.String);
+      folders.value = folders.value.filter((item: Folder) => !response_ids.includes(item.id.id.String));
+      if (folder_ids.length !== response.length) {
+        error_message.value = "You can't delete folder with data inside."
       }
+      sortValues(sorted_by.value);
     }).catch(err => {
       if (err.status === 401) {
         logout()
@@ -299,6 +307,7 @@ export const useStorageStorage = defineStore('storage', () => {
       throw err;
     })
   }
+
   function deleteFiles(file_ids: object[]) {
     axios.post(import.meta.env.VITE_API_URL + "/storage/delete_objects", {
         object_ids: file_ids,
@@ -307,12 +316,9 @@ export const useStorageStorage = defineStore('storage', () => {
         headers: {
           Authorization: localStorage.getItem('jwt'),
         }}
-    ).then(res => {
-      if (current_folder_parent.value) {
-        getFiles(current_folder_parent.value.id);
-      } else {
-        getFiles(undefined);
-      }
+    ).then(_ => {
+      files.value = files.value.filter((item: File) => !file_ids.includes(item.id));
+      sortValues(sorted_by.value);
     }).catch(err => {
       if (err.status === 401) {
         logout()
@@ -356,7 +362,11 @@ export const useStorageStorage = defineStore('storage', () => {
           Authorization: localStorage.getItem('jwt'),
         }}
     ).then(res => {
-      getFolders(current_folder_parent.value?.id);
+      let data:Folder = res.data;
+      folders.value = folders.value.filter((item: Folder) => item.id != folder_id);
+      folders.value.push(data);
+      sortValues(sorted_by.value);
+
     }).catch(err => {
       if (err.status === 401) {
         logout()
@@ -378,7 +388,10 @@ export const useStorageStorage = defineStore('storage', () => {
           Authorization: localStorage.getItem('jwt'),
         }}
     ).then(res => {
-      getFiles(current_folder_parent.value?.id);
+      let data:File = res.data;
+      files.value = files.value.filter((item: Folder) => item.id != object_id);
+      files.value.push(data);
+      sortValues(sorted_by.value);
     }).catch(err => {
       if (err.status === 401) {
         logout()
