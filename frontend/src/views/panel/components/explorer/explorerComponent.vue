@@ -165,7 +165,7 @@ const getImgFromBase64 = (thumbnail: any) => {
               <TableCell v-show="storage.headers[1]?.selected">
                 <Folder />
               </TableCell>
-              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">{{ item.name }}</TableCell>
+              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer truncate" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">{{ item.name }}</TableCell>
               <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
               <TableCell v-show="storage.headers[4]?.selected">{{  }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
@@ -283,7 +283,7 @@ const getImgFromBase64 = (thumbnail: any) => {
                 <File class="ml-2" v-else />
 
               </TableCell>
-              <TableCell v-show="storage.headers[2]?.selected">{{ item.name }}</TableCell>
+              <TableCell v-show="storage.headers[2]?.selected" class="truncate">{{ item.name }}</TableCell>
               <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
               <TableCell v-show="storage.headers[4]?.selected">{{ formatBytes(item.size) }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
