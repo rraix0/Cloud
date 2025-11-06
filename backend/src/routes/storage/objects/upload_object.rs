@@ -10,12 +10,13 @@ use rocket::{post, FromForm, State, form::Form};
 use rocket::fs::TempFile;
 use rocket::http::Status;
 use rocket::serde::json::Json;
-use surrealdb::{Surreal, engine::any::Any};
+use surrealdb::{Surreal, engine::any::Any, Response};
 use surrealdb::sql::Bytes;
 use surrealdb::sql::Thing;
 use uuid::Uuid;
 use webp::{Encoder, WebPMemory};
 use crate::types::auth_type::{AuthToken};
+use crate::types::storage::object::ObjectType;
 
 #[derive(FromForm, Debug)]
 pub struct UploadObject<'a> {
@@ -32,7 +33,7 @@ pub async fn upload_object<'a>(
     client: &State<Arc<Client>>,
     form: Form<UploadObject<'a>>,
     auth_token: AuthToken,
-) -> Result<(Status, Json<String>), (Status, &'static str)> {
+) -> Result<(Status, Json<ObjectType>), (Status, &'static str)> {
     // Check storage capacity
     let mut actual_files_size_response = db
         .query("RETURN [math::sum((select size from files where $user_id).size), (select storage_capacity from $user_id).storage_capacity[0]];")
@@ -103,18 +104,34 @@ pub async fn upload_object<'a>(
         .bind(("thumbnail", thumbnail))
         .await;
 
+    let response_object:ObjectType = match resp {
+        Ok(mut resp) => {
+            match resp.take::<Vec<ObjectType>>(0){
+                Ok(object) => {
+                    if let Some(object) = object.get(0) {
+                        object.clone()
+                    } else {
+                        return Err((Status::InternalServerError, "File has been saved, but database didn't response."));
+                    }
 
-    if let Err(_) = resp {
-        let _ = client.delete_object()
-            .bucket(env::var("AWS_BUCKET").unwrap())
-            .key(key)
-            .send()
-            .await
-            .map_err(|err| {
-                eprintln!("Occurred an error while trying to remove file after db error: {:?}", err);
-            });
-        return Err((Status::InternalServerError, "Occurred server error while trying to upload file"));
-    }
+                }
+                Err(_) => {
+                    return Err((Status::InternalServerError, "File has been saved, but occurred and error while trying response."));
+                }
+            }
+        },
+        Err(err) => {
+            let _ = client.delete_object()
+              .bucket(env::var("AWS_BUCKET").unwrap())
+              .key(key)
+              .send()
+              .await
+              .map_err(|err| {
+                  eprintln!("Occurred an error while trying to remove file after db error: {:?}", err);
+              });
+            return Err((Status::InternalServerError, "Occurred server error while trying to upload file"));
+        }
+    };
+    return Ok((Status::Ok, Json(response_object)));
 
-    Ok((Status::Ok, Json(format!("{:#?}", resp))))
 }

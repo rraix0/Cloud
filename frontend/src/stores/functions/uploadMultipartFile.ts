@@ -72,7 +72,9 @@ export const uploadMultipartFile = async (item: FileObject) => {
       'Content-Type': 'multipart/form-data',
       Authorization: localStorage.getItem('jwt'),
     },
-  }).then(() => {
+  }).then((resp) => {
+    storage.files.push(resp.data)
+    storage.sortValues(storage.sorted_by)
     item.upload_progress = 100;
     item.upload_status = "done"
   }).catch((err) => {

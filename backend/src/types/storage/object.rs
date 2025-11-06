@@ -2,7 +2,7 @@ use rocket::serde::{Deserialize, Serialize};
 use surrealdb::Datetime;
 use surrealdb::sql::{Bytes, Object, Thing};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ObjectType {
     pub created_at: Datetime,
     pub id: Thing,

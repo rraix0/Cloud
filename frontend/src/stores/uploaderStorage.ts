@@ -65,7 +65,7 @@ export const useUploaderStorage = defineStore('uploaderStorage', () => {
 
       actual_file_index++;
       console.log("DONE")
-      storage.getFiles(storage.current_folder_parent?.id);
+      //storage.getFiles(storage.current_folder_parent?.id);
 
     }
 

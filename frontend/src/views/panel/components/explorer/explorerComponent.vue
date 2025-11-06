@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp  } from 'lucide-vue-next'
+import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Settings, FileText, FileSpreadsheet, FileChartColumnIncreasing, Type, FileImage, FileVideo, FileAudio, FileCode, FileArchive, Box,  FileVideoCamera, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp  } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -252,6 +252,31 @@ const getImgFromBase64 = (thumbnail: any) => {
                   alt="thumbnail"
                   class="thumbnail h-[50px] w-[50px]"
                 />
+                <!-- VIDEO -->
+                <FileVideo class="ml-2" v-else-if="item.name.match(/\.(mp4|mkv|mov|avi|wmv|flv|webm)$/i)" />
+                <!-- AUDIO -->
+                <FileAudio class="ml-2" v-else-if="item.name.match(/\.(mp3|wav|ogg|flac|aac|m4a|opus)$/i)" />
+                <!-- IMAGES (with noe thumbnail) -->
+                <FileImage class="ml-2" v-else-if="item.name.match(/\.(jpg|jpeg|png|gif|bmp|svg|webp|tiff|ico)$/i)" />
+                <!-- TEXT -->
+                <FileText class="ml-2" v-else-if="item.name.match(/\.(txt|md|rtf|log)$/i)" />
+                <!-- PDF -->
+                <FileArchive class="ml-2" v-else-if="item.name.match(/\.pdf$/i)" />
+                <!-- DOCS -->
+                <FileSpreadsheet class="ml-2" v-else-if="item.name.match(/\.(xls|xlsx|ods|csv)$/i)" />
+                <FileChartColumnIncreasing class="ml-2" v-else-if="item.name.match(/\.(ppt|pptx|odp)$/i)" />
+                <FileText class="ml-2" v-else-if="item.name.match(/\.(doc|docx|odt)$/i)" />
+                <!-- SOURCE CODE -->
+                <FileCode class="ml-2" v-else-if="item.name.match(/\.(js|ts|jsx|tsx|vue|html|css|scss|json|xml|yml|yaml|sh|bash|zsh|php|py|rb|go|rs|c|cpp|h|hpp|java|cs)$/i)" />
+                <!-- ARCHIVE -->
+                <FileArchive class="ml-2" v-else-if="item.name.match(/\.(zip|rar|7z|tar|gz|bz2|xz|iso)$/i)" />
+                <!-- MODELS 3D -->
+                <Box class="ml-2" v-else-if="item.name.match(/\.(obj|fbx|glb|gltf|blend|stl)$/i)" />
+                <!-- FONTS -->
+                <Type class="ml-2" v-else-if="item.name.match(/\.(ttf|otf|woff|woff2)$/i)" />
+                <!-- CONFIGS / SYSTEM -->
+                <Settings class="ml-2" v-else-if="item.name.match(/\.(ini|conf|cfg|env|toml)$/i)" />
+                <!-- UNKNOWN / DEFAULT -->
                 <File class="ml-2" v-else />
 
               </TableCell>

@@ -9,6 +9,7 @@ use surrealdb::sql::Thing;
 use crate::routes::storage::objects::multipart::part_info_storage::{PartInfoHashMap, PartInfoStorageData};
 use crate::STORAGE;
 use crate::types::auth_type::{AuthToken};
+use crate::types::storage::object::ObjectType;
 
 #[derive(FromForm)]
 pub struct CompleteUpload {
@@ -21,7 +22,7 @@ pub async fn complete_multipart_upload(
     client: &State<Arc<Client>>,
     form: Form<CompleteUpload>,
     auth_token: AuthToken,
-) -> Result<(Status, Json<String>), (Status, &'static str)> {
+) -> Result<(Status, Json<ObjectType>), (Status, &'static str)> {
 
     let part: PartInfoStorageData = {
         let storage: MutexGuard<PartInfoHashMap> = STORAGE.lock().map_err(|_| (Status::InternalServerError, "Error while collecting file parts"))?;
@@ -77,17 +78,34 @@ pub async fn complete_multipart_upload(
         .bind(("parent_id", part.folder.clone()))
         .await;
 
-    if let Err(_) = resp {
-        let _ = client.delete_object()
-            .bucket(env::var("AWS_BUCKET").unwrap())
-            .key(part.key)
-            .send()
-            .await
-            .map_err(|err| {
-                eprintln!("Occurred an error while trying to remove file after db error: {:?}", err);
-            });
-        return Err((Status::InternalServerError, "Occurred server error while trying to upload file"));
-    }
+    let response_object:ObjectType = match resp {
+        Ok(mut resp) => {
+            match resp.take::<Vec<ObjectType>>(0){
+                Ok(object) => {
+                    if let Some(object) = object.get(0) {
+                        object.clone()
+                    } else {
+                        return Err((Status::InternalServerError, "File has been saved, but database didn't response."));
+                    }
 
-    return Ok((Status::Ok, Json(format!("{:#?}", resp))));
+                }
+                Err(_) => {
+                    return Err((Status::InternalServerError, "File has been saved, but occurred and error while trying response."));
+                }
+            }
+        },
+        Err(err) => {
+            let _ = client.delete_object()
+              .bucket(env::var("AWS_BUCKET").unwrap())
+              .key(part.key)
+              .send()
+              .await
+              .map_err(|err| {
+                  eprintln!("Occurred an error while trying to remove file after db error: {:?}", err);
+              });
+            return Err((Status::InternalServerError, "Occurred server error while trying to upload file"));
+        }
+    };
+
+    return Ok((Status::Ok, Json(response_object)));
 }
