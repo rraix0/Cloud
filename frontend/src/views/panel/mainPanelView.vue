@@ -9,7 +9,7 @@ if (!localStorage.getItem('jwt')) {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-background text-foreground">
+  <div class="flex h-screen bg-background text-foreground">
     <sidebarComponent />
     <RouterView />
   </div>
