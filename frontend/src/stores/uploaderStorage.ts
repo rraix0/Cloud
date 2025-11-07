@@ -4,12 +4,18 @@ import { useStorageStorage } from '@/stores/storageStorage.ts'
 import { file } from 'zod'
 import { uploadFile } from '@/stores/functions/uploadFile.ts'
 import { uploadMultipartFile } from '@/stores/functions/uploadMultipartFile.ts'
+interface Thing {
+  id: {
+    String: string
+  },
+  tb: string,
+}
 export interface FileObject {
   file: File,
   upload_status: "pending"|"running"|"done"|"error"|"aborted",
   upload_progress: number,
   errorMessage: string,
-  parent_id: object
+  parent_id: Thing
 }
 
 export const useUploaderStorage = defineStore('uploaderStorage', () => {

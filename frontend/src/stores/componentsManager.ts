@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 export const useComponentsManager = defineStore('components-manager', () => {
   // SIDEBAR
-  const isPhone = ref(window.innerWidth <= 1024)
+  const isPhone = ref(window.innerWidth <= 768)
   const sidebar_open = ref<boolean>(!isPhone.value)
   const sidebar_collapse = ref<boolean>(true);
 

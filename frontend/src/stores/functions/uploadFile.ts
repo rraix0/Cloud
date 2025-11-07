@@ -31,8 +31,11 @@ export const uploadFile = async (item: FileObject) => {
     }).then((res) => {
     item.upload_progress = 100;
     item.upload_status = "done"
-    storage.files.push(res.data);
-    storage.sortValues(storage.sorted_by)
+    let res_file:FileObject = res.data;
+    if (storage.current_folder_parent?.id.id.String == res_file.parent_id.id.String) {
+      storage.files.push(res.data);
+      storage.sortValues(storage.sorted_by)
+    }
   }).catch((err) => {
     console.log(err)
     item.errorMessage = err.response.data;

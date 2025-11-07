@@ -546,6 +546,6 @@ export const useStorageStorage = defineStore('storage', () => {
   return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects, path, sorted_by, is_waiting_for_server,
     getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues, goTo,
     renameFolder, renameFile,
-    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory, sortValues
+    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory, sortValues,
   }
 })
