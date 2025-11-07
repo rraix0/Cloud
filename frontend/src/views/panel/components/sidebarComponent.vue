@@ -41,7 +41,7 @@ const route = useRoute()
 
 <template>
   <aside
-    class="z-10 fixed md:static flex flex-col min-h-screen justify-between border-r bg-card p-4 shadow-sm w-min"
+    class="z-10 fixed md:static flex flex-col h-full justify-between border-r bg-card p-4 shadow-sm w-min"
     v-show="components_manager.sidebar_open"
   >
     <div class="space-y-6">
