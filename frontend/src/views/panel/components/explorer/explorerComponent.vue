@@ -172,13 +172,15 @@ const getImgFromBase64 = (thumbnail: any) => {
           <template v-if="storage.folders.length > 0 || storage.files.length > 0">
             <!-- ================== FOLDERS ================== -->
             <TableRow v-for="(item, index) in storage.folders.filter(x => x.show !== false)" :key="index">
-              <TableCell v-show="storage.headers[0]?.selected">
-                <Checkbox v-model="item.selected" />
+              <TableCell v-show="storage.headers[0]?.selected" class="p-0">
+                <label class=" px-2 py-3">
+                  <Checkbox v-model="item.selected" />
+                </label>
               </TableCell>
               <TableCell v-show="storage.headers[1]?.selected">
                 <Folder />
               </TableCell>
-              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer truncate" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">
+              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer truncate pl-1 md:pl-2" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">
                 <span class="truncate hidden md:block">{{ item.name }}</span>
                 <div class="leading-none md:hidden">
                   <span class="truncate text-lg">{{ item.name }}</span><br>
@@ -266,8 +268,10 @@ const getImgFromBase64 = (thumbnail: any) => {
             </TableRow>
             <!-- ================== FILES ================== -->
             <TableRow v-for="(item, index) in storage.files.filter(x => x.show !== false )" :key="index">
-              <TableCell v-show="storage.headers[0]?.selected" >
-                <Checkbox v-model="item.selected" />
+              <TableCell v-show="storage.headers[0]?.selected" class="p-0">
+                <label class=" px-2 py-3">
+                  <Checkbox v-model="item.selected" />
+                </label>
               </TableCell>
               <TableCell v-show="storage.headers[1]?.selected" class="p-0">
                 <img
@@ -304,7 +308,7 @@ const getImgFromBase64 = (thumbnail: any) => {
                 <File class="ml-2" v-else />
 
               </TableCell>
-              <TableCell v-show="storage.headers[2]?.selected" class="truncate py-0">
+              <TableCell v-show="storage.headers[2]?.selected" class="truncate py-0 pl-1 md:pl-2">
                 <span class="truncate hidden md:block">{{ item.name }}</span>
                 <div class="leading-none h-[50px] md:hidden">
                   <span class="truncate text-lg">{{ item.name }}</span><br>

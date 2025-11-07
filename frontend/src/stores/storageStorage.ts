@@ -47,7 +47,7 @@ export const useStorageStorage = defineStore('storage', () => {
         id: 0,
         name: 'Select',
         col_type: 2,
-        style: "w-7",
+        style: "w-8",
         selected: true,
       },
       {
