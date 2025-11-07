@@ -16,7 +16,7 @@ const closeDialog = () => {
 <template>
   <DropdownMenu v-model:open="openDialog">
     <DropdownMenuTrigger as-child>
-      <Button variant="outline" class="ml-3 md:ml-6">
+      <Button variant="outline" class="ml-2 md:ml-6">
         <Plus /> New <ChevronDown v-if="openDialog" class="ml-2 h-4 w-4" /><ChevronUp v-if="!openDialog" class="ml-2 h-4 w-4" />
       </Button>
     </DropdownMenuTrigger>

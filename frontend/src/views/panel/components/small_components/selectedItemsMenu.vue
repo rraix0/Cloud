@@ -25,7 +25,7 @@ const storage = useStorageStorage();
 
 <template>
   <DropdownMenu>
-    <DropdownMenuTrigger class="mr-3 flex column gap-1" v-if="(storage.folders.filter((item) => item.selected === true).length + storage.files.filter((item) => item.selected === true).length) > 0">
+    <DropdownMenuTrigger class="md:mr-3 flex column gap-1" v-if="(storage.folders.filter((item) => item.selected === true).length + storage.files.filter((item) => item.selected === true).length) > 0">
       <Button>
         {{ storage.folders.filter((item) => item.selected === true).length + storage.files.filter((item) => item.selected === true).length }}/{{ storage.folders.length + storage.files.length }}
         <List />

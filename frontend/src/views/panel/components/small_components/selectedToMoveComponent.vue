@@ -33,7 +33,7 @@ const openDialog = ref<boolean>()
 
 <template>
   <DropdownMenu v-if="storage.move_objects.is_moving" v-model:open="openDialog">
-    <DropdownMenuTrigger class="ml-auto">
+    <DropdownMenuTrigger class="ml-2 md:ml-auto">
       <Button>
         <Move /> Moving <ChevronDown v-if="openDialog" /><ChevronUp v-if="!openDialog" />
       </Button>
