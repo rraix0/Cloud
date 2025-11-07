@@ -24,11 +24,18 @@ import { useComponentsManager } from '@/stores/componentsManager.ts'
 import { logout } from '@/views/panel/functions/logout.ts'
 import { useStorageStorage} from '@/stores/storageStorage.ts'
 import ColumnsDropDownMenuComopnent from '@/views/panel/components/small_components/columnsDropDownMenuComopnent.vue'
-const storage= useStorageStorage();
+import { onClickOutside } from '@vueuse/core'
+import { useTemplateRef } from 'vue'
 
+
+
+const storage= useStorageStorage();
+const components_manager = useComponentsManager()
 const route = useRoute()
 
-const components_manager = useComponentsManager()
+
+
+
 
 </script>
 
@@ -110,7 +117,7 @@ const components_manager = useComponentsManager()
           <Search />
           Find file
         </Button>
-        <ColumnsDropDownMenuComopnent class="" />
+        <ColumnsDropDownMenuComopnent />
       </div>
     </div>
     <!-- END -->
