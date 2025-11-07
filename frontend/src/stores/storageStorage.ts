@@ -3,8 +3,10 @@ import { defineStore } from 'pinia'
 import { ArrowDownUp, ArrowUpWideNarrow, ArrowDownWideNarrow } from 'lucide-vue-next'
 import axios from 'axios'
 import { logout } from '@/views/panel/functions/logout.ts'
+import { useComponentsManager} from '@/stores/componentsManager.ts'
 
 export const useStorageStorage = defineStore('storage', () => {
+  const components_storage = useComponentsManager();
   const move_objects = ref<{is_moving: boolean, files: File[], folders: Folder[]}>({is_moving: false, files: [], folders: []})
 
   const sorted_by = ref<SortedBy>('name');
@@ -76,7 +78,7 @@ export const useStorageStorage = defineStore('storage', () => {
         col_type: 3,
         style: "w-20 md:w-25",
         icon: () => {return sorted_by.value == 'date' ? ArrowUpWideNarrow : sorted_by.value == 'r_date' ? ArrowDownWideNarrow : ArrowDownUp} ,
-        selected: true,
+        selected: !components_storage.isPhone,
         action: () => sorted_by.value == 'date'?  sortValues('r_date'): sortValues('date'),
       },
       {
@@ -85,7 +87,7 @@ export const useStorageStorage = defineStore('storage', () => {
         col_type: 3,
         style: "w-20 md:w-25",
         icon: () => {return sorted_by.value == 'size' ? ArrowUpWideNarrow : sorted_by.value == 'r_size' ? ArrowDownWideNarrow : ArrowDownUp},
-        selected: true,
+        selected: !components_storage.isPhone,
         action: () => sorted_by.value == 'size'?  sortValues('r_size'): sortValues('size'),
       },
       {

@@ -18,20 +18,22 @@ const localOpen = ref()
 </script>
 
 <template>
-  <DropdownMenu v-model:open="localOpen">
-    <DropdownMenuTrigger as-child>
-      <Button variant="outline" class="ml-6">
-        <Columns3Cog /> Columns <ChevronDown v-if="localOpen" class="ml-2 h-4 w-4" /><ChevronUp v-if="!localOpen" class="ml-2 h-4 w-4" />
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end">
-      <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuCheckboxItem v-for="item in storage.headers" :key="item.id" v-model:model-value="item.selected" @select.prevent>
-        {{ item.name }}
-      </DropdownMenuCheckboxItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
+  <div>
+    <DropdownMenu v-model:open="localOpen" class="hidden">
+      <DropdownMenuTrigger as-child>
+        <Button variant="outline" class="md:ml-6">
+          <Columns3Cog /> Columns <ChevronDown v-if="localOpen" class="ml-2 h-4 w-4" /><ChevronUp v-if="!localOpen" class="ml-2 h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Columns</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem v-for="item in storage.headers" :key="item.id" v-model:model-value="item.selected" @select.prevent>
+          {{ item.name }}
+        </DropdownMenuCheckboxItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
 </template>
 
 <style scoped>

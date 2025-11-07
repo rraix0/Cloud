@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Settings, FileText, FileSpreadsheet, FileChartColumnIncreasing, Type, FileImage, FileVideo, FileAudio, FileCode, FileArchive, Box,  FileVideoCamera, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp  } from 'lucide-vue-next'
+import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Settings, FileText, FileSpreadsheet, FileChartColumnIncreasing, Type, FileImage, FileVideo, FileAudio, FileCode, FileArchive, Box,  FileVideoCamera, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp,
+  ChevronRight
+} from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -71,6 +73,8 @@ import UploadQueueComponent from '@/views/panel/components/small_components/uplo
 import SelectedItemsMenu from '@/views/panel/components/small_components/selectedItemsMenu.vue'
 import SelectedToMoveComponent from '@/views/panel/components/small_components/selectedToMoveComponent.vue'
 import PathDirectoryComponent from '@/views/panel/components/small_components/pathDirectoryComponent.vue'
+import { useComponentsManager} from '@/stores/componentsManager.ts'
+const components_manager = useComponentsManager();
 
 function formatBytes(bytes:number) {
   if (bytes === 0) return '0 B';
@@ -101,7 +105,7 @@ const getImgFromBase64 = (thumbnail: any) => {
 </script>
 
 <template>
-  <div class="h-full max-h-full overflow-auto px-3">
+  <div class="h-full max-h-full overflow-auto md:px-3">
     <div class="flex flex-col gap-2">
       <span v-if="storage.error_message" class="flex w-full border border-red-500 rounded-md p-1 text-center text-red-400 font-bold pl-3">
         {{ storage.error_message }}
@@ -112,12 +116,21 @@ const getImgFromBase64 = (thumbnail: any) => {
         <CircleX class="ml-auto mr-1 hover:text-white hover:cursor-pointer" @click="storage.info_message = ''" />
       </span>
     </div>
+    <div class="flex items-center pt-2 md:hidden" v-show="components_manager.filter_files_input">
+      <!-- PHONE -->
+      <Input class="max-w-sm md:hidden" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
+      <Button variant="outline" class="p-0 ml-2" @click="components_manager.toggleFilterInputPhone(); storage.filterValues('')"><circle-x /></Button>
+    </div>
 
-    <div class="flex items-center py-4">
+    <div class="flex items-center py-3">
+      <!-- PHONE -->
+      <Button class="md:hidden" @click="components_manager.toggleSidebarOpen()" variant="outline"><ChevronRight class="h-5 w-5" /></Button>
       <SelectedItemsMenu />
 
-      <Input class="max-w-sm" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
-      <Button variant="outline" class="ml-5" @click="() => {storage.goUp();}">
+      <!-- PC -->
+      <Input class="max-w-sm hidden md:block" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
+
+      <Button variant="outline" class="ml-3 md:ml-5" @click="() => {storage.goUp();}">
         <ChevronsUp /> Go up
       </Button>
 
@@ -131,7 +144,7 @@ const getImgFromBase64 = (thumbnail: any) => {
         <RefreshCcw /> Refresh
       </Button>
 
-      <ColumnsDropDownMenuComopnent />
+      <ColumnsDropDownMenuComopnent class="hidden md:block" />
     </div>
 
     <PathDirectoryComponent />
@@ -165,7 +178,15 @@ const getImgFromBase64 = (thumbnail: any) => {
               <TableCell v-show="storage.headers[1]?.selected">
                 <Folder />
               </TableCell>
-              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer truncate" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">{{ item.name }}</TableCell>
+              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer truncate" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">
+                <span class="truncate hidden md:block">{{ item.name }}</span>
+                <div class="leading-none md:hidden">
+                  <span class="truncate text-lg">{{ item.name }}</span><br>
+                  <div class=" text-xs p-0 m-0 ml-3 flex">
+                    <span>{{ new Date(item.created_at).toLocaleDateString() }}</span>
+                  </div>
+                </div>
+              </TableCell>
               <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
               <TableCell v-show="storage.headers[4]?.selected">{{  }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
@@ -283,7 +304,16 @@ const getImgFromBase64 = (thumbnail: any) => {
                 <File class="ml-2" v-else />
 
               </TableCell>
-              <TableCell v-show="storage.headers[2]?.selected" class="truncate">{{ item.name }}</TableCell>
+              <TableCell v-show="storage.headers[2]?.selected" class="truncate py-0">
+                <span class="truncate hidden md:block">{{ item.name }}</span>
+                <div class="leading-none h-[50px] md:hidden">
+                  <span class="truncate text-lg">{{ item.name }}</span><br>
+                  <div class=" text-xs p-0 m-0 ml-3 flex">
+                    <span>{{ new Date(item.created_at).toLocaleDateString() }}</span>
+                    <div class="ml-auto pr-5">{{ formatBytes(item.size) }}</div>
+                  </div>
+                </div>
+              </TableCell>
               <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
               <TableCell v-show="storage.headers[4]?.selected">{{ formatBytes(item.size) }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
