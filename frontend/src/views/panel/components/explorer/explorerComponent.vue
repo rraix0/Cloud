@@ -178,7 +178,7 @@ const getImgFromBase64 = (thumbnail: any) => {
             <!-- ================== FOLDERS ================== -->
             <TableRow v-for="(item, index) in storage.folders.filter(x => x.show !== false)" :key="index">
               <TableCell v-show="storage.headers[0]?.selected" class="p-0">
-                <label class=" px-2 py-3">
+                <label class=" px-2 py-3 flex items-center">
                   <Checkbox v-model="item.selected" />
                 </label>
               </TableCell>
@@ -274,7 +274,7 @@ const getImgFromBase64 = (thumbnail: any) => {
             <!-- ================== FILES ================== -->
             <TableRow v-for="(item, index) in storage.files.filter(x => x.show !== false )" :key="index">
               <TableCell v-show="storage.headers[0]?.selected" class="p-0">
-                <label class=" px-2 py-3">
+                <label class=" px-2 py-3 flex items-center">
                   <Checkbox v-model="item.selected" />
                 </label>
               </TableCell>
