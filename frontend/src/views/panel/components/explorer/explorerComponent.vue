@@ -185,7 +185,7 @@ const getImgFromBase64 = (thumbnail: any) => {
               <TableCell v-show="storage.headers[1]?.selected">
                 <Folder />
               </TableCell>
-              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer truncate pl-1 md:pl-2" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">
+              <TableCell v-show="storage.headers[2]?.selected" class="hover:cursor-pointer truncate py-0 pl-1 md:pl-2" @click="() => {storage.getFolders(item.id); storage.getFiles(item.id); }">
                 <span class="truncate hidden md:block">{{ item.name }}</span>
                 <div class="leading-none md:hidden">
                   <span class="truncate text-lg">{{ item.name }}</span><br>
