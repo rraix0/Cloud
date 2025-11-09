@@ -10,7 +10,7 @@ use surrealdb::{Surreal, engine::any::Any};
 use tokio::time::sleep;
 use crate::routes::storage::objects::multipart::part_info_storage::{PartInfoHashMap, PartInfoStorage, PartInfoStorageData};
 use crate::STORAGE;
-use crate::types::auth_type::{AuthToken};
+use crate::guards::auth_type::{AuthToken};
 
 #[derive(FromForm)]
 pub struct UploadPart<'a> {

@@ -4,6 +4,8 @@ import { useStorageStorage } from '@/stores/storageStorage.ts'
 import { file } from 'zod'
 import { uploadFile } from '@/stores/functions/uploadFile.ts'
 import { uploadMultipartFile } from '@/stores/functions/uploadMultipartFile.ts'
+import axios from 'axios'
+import { logout } from '@/views/panel/functions/logout.ts'
 interface Thing {
   id: {
     String: string
@@ -15,17 +17,16 @@ export interface FileObject {
   upload_status: "pending"|"running"|"done"|"error"|"aborted",
   upload_progress: number,
   errorMessage: string,
-  parent_id: Thing
+  parent_id: Thing,
+  upload_id: number | undefined,
 }
 
 export const useUploaderStorage = defineStore('uploaderStorage', () => {
   const storage = useStorageStorage()
 
-
   const isUploading = ref(false)
-
-
   const uploadQueue = ref<FileObject[]>([]);
+
   const addFiles = (files: File[]) => {
     let folder_id = storage.current_folder_parent?.id;
     if (!folder_id) {
@@ -39,6 +40,7 @@ export const useUploaderStorage = defineStore('uploaderStorage', () => {
         upload_progress: 0,
         errorMessage: '',
         parent_id: folder_id,
+        upload_id: undefined,
       }
       return single_file
     })
@@ -49,6 +51,39 @@ export const useUploaderStorage = defineStore('uploaderStorage', () => {
     console.log(uploadQueue.value);
   }
 
+  const removeFile = (file_index: number) => {
+    if (!uploadQueue.value[file_index]) return;
+    if (uploadQueue.value[file_index].upload_status === "pending") {
+      uploadQueue.value[file_index].upload_status = "aborted"
+      uploadQueue.value = uploadQueue.value.filter((_, i) => i !== file_index)
+    } else if (uploadQueue.value[file_index].upload_status === "running") {
+      if (!uploadQueue.value[file_index].upload_id) {
+        storage.error_message = "Unable to remove file from queue"
+        return;
+      }
+      uploadQueue.value[file_index].upload_status = "aborted"
+
+      const formData = new FormData();
+      formData.append('upload_id', String(uploadQueue.value[file_index].upload_id));
+
+      axios.post(import.meta.env.VITE_API_URL + "/storage/abort_multipart_upload",
+        formData,
+      {
+        headers: {
+          Authorization: localStorage.getItem('jwt'),
+        }}
+
+      ).then(res => {
+        console.log(res.data);
+      }).catch(err => {
+        storage.error_message = err.response.data;
+        if (err.status === 401) {
+          logout()
+        }
+        console.log(err);
+      })
+    }
+  }
 
   const startUpload = async () => {
     if (isUploading.value) return;
@@ -61,6 +96,8 @@ export const useUploaderStorage = defineStore('uploaderStorage', () => {
 
       console.log("Attempting to upload file");
       console.log(file_object.file.name);
+
+      file_object.upload_status = "running";
 
       if (file_object.file.size < (16 * 1024 * 1024)) {
         await uploadFile(file_object);
@@ -82,5 +119,5 @@ export const useUploaderStorage = defineStore('uploaderStorage', () => {
 
 
 
-  return { uploadQueue, addFiles }
+  return { uploadQueue, addFiles, removeFile }
 })

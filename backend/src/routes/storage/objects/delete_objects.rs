@@ -10,7 +10,7 @@ use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
-use crate::types::auth_type::{AuthToken};
+use crate::guards::auth_type::{AuthToken};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct DeleteObjects {

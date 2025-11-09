@@ -12,7 +12,7 @@ use crate::types::users::login_type::{
     UserLoginRequest,
 };
 
-use crate::types::auth_type::Claims;
+use crate::guards::auth_type::Claims;
 
 #[post("/users/login", data = "<account>")]
 pub async fn login(

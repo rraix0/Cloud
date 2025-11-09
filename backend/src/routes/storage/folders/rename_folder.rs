@@ -8,7 +8,7 @@ use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 use uuid::Uuid;
 use crate::types::storage::folder::{CreateFolder, Folder, RenameFolder};
-use crate::types::auth_type::AuthToken;
+use crate::guards::auth_type::AuthToken;
 use crate::types::storage::object::ObjectType;
 
 #[post("/storage/rename_folder", data = "<data>")]

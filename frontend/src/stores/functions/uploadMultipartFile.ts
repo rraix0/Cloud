@@ -4,6 +4,7 @@ import { useStorageStorage} from '@/stores/storageStorage.ts'
 
 
 export const uploadMultipartFile = async (item: FileObject) => {
+
   const storage = useStorageStorage()
   const chunkSize = 16 * 1024 * 1024 // 16 MB
   let file = item.file
@@ -31,12 +32,15 @@ export const uploadMultipartFile = async (item: FileObject) => {
    }).catch((err) => {
      item.errorMessage = err.response.data;
      storage.error_message = err.response.data;
+     return;
    })
   const uploadId = initResponse;
+   item.upload_id = uploadId;
   if (!uploadId) return;
 
   // STEP 2
   for (let i = 0; i < totalChunks; i++) {
+    if(item.upload_status === "aborted") return;
     const start = i * chunkSize
     const end = Math.min(start + chunkSize, file.size)
     const chunk = file.slice(start, end)
@@ -61,6 +65,9 @@ export const uploadMultipartFile = async (item: FileObject) => {
           )
         }
       },
+    }).catch((err) => {
+      item.errorMessage = err.response.data;
+      return;
     })
   }
 
@@ -82,5 +89,6 @@ export const uploadMultipartFile = async (item: FileObject) => {
     item.upload_status = "done"
   }).catch((err) => {
     item.errorMessage = err.response.data;
+    return;
   })
 }

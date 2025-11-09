@@ -6,7 +6,7 @@ use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
 use surrealdb::sql::{Datetime, Thing};
 use surrealdb::Surreal;
-use crate::types::auth_type::AuthToken;
+use crate::guards::auth_type::AuthToken;
 use crate::types::users::user::SafeUserData;
 
 #[post("/users/get_user_info")]

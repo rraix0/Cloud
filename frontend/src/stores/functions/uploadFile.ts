@@ -40,6 +40,7 @@ export const uploadFile = async (item: FileObject) => {
     console.log(err)
     item.errorMessage = err.response.data;
     storage.error_message = err.response.data;
+    return;
   })
 }
 

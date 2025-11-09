@@ -31,11 +31,11 @@ const uploader_store = useUploaderStorage()
           <ScrollArea class="w-full h-[90vh]">
             <div v-for="(item, index) in uploader_store.uploadQueue" key="index" class="mb-4 flex ">
               <div class="w-full">
-                <span class="text-base text-primary">{{ item.file.name }}</span><br>
-                <span class="text-muted-foreground ml-2 text-sm">Status: {{item.upload_status}}</span>
+                <span class="text-base text-primary" :class="{'text-red-500': (item.upload_status === 'aborted')}">{{ item.file.name }}</span><br>
+                <span class="text-muted-foreground ml-2 text-sm" :class="{'text-red-500': (item.upload_status === 'aborted')}">Status: {{item.upload_status}}</span>
                 <Progress :model-value="item.upload_progress" class="h-1 ml-2" />
               </div>
-              <div class="flex  justify-end mt-2 mr-2">
+              <div class="flex  justify-end mt-2 mr-2" @click="uploader_store.removeFile(index)">
                 <X class="hover:text-red-500" />
               </div>
             </div>

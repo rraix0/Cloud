@@ -7,7 +7,7 @@ use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 use uuid::Uuid;
 use crate::types::storage::folder::{CreateFolder, Folder};
-use crate::types::auth_type::AuthToken;
+use crate::guards::auth_type::AuthToken;
 
 #[post("/storage/create_folder", data = "<data>")]
 pub async fn create_folder(

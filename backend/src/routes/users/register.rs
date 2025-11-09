@@ -8,7 +8,7 @@ use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
 use uuid::{Uuid};
-use crate::types::auth_type::Claims;
+use crate::guards::auth_type::Claims;
 use crate::types::users::{
     register_type::UserRegisterRequest,
     ticket::Ticket,

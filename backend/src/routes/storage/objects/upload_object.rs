@@ -15,7 +15,7 @@ use surrealdb::sql::Bytes;
 use surrealdb::sql::Thing;
 use uuid::Uuid;
 use webp::{Encoder, WebPMemory};
-use crate::types::auth_type::{AuthToken};
+use crate::guards::auth_type::{AuthToken};
 use crate::types::storage::object::ObjectType;
 
 #[derive(FromForm, Debug)]

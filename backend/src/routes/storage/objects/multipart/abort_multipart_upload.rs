@@ -6,7 +6,7 @@ use rocket::http::Status;
 use rocket::serde::json::Json;
 use surrealdb::{Surreal, engine::any::Any};
 use crate::routes::storage::objects::multipart::part_info_storage::{PartInfoHashMap, STORAGE};
-use crate::types::auth_type::{AuthToken};
+use crate::guards::auth_type::{AuthToken};
 
 #[derive(FromForm)]
 pub struct AbortUpload {

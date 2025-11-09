@@ -1,12 +1,11 @@
 use std::sync::Arc;
 use aws_sdk_s3::Client;
-use rocket::{routes, launch};
+use rocket::{launch, routes};
 use dotenvy::dotenv;
 use rocket::http::Method;
 use rocket_cors::{AllowedOrigins, CorsOptions};
 use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
-
 mod routes;
 mod types;
 mod surreal;
@@ -14,45 +13,32 @@ mod minio;
 mod guards;
 
 use crate::{
+    minio::connection_minio::get_connection_minio
+    ,
     routes::{
+        storage::{
+            folders::{
+                create_folder::create_folder,
+                delete_folders::delete_folders,
+                get_folders::get_folders,
+            },
+            objects::{
+                get_objects::get_objects,
+                multipart::{
+                    complete_multipart_upload::complete_multipart_upload,
+                    create_multipart_upload::create_multipart_upload,
+                    multipart_upload::multipart_upload,
+                    part_info_storage::STORAGE,
+                },
+                upload_object::upload_object,
+            }
+        },
         users::{
             login::login,
             register::register,
-        },
-        storage::{
-            folders::{
-                get_folders::get_folders,
-                create_folder::create_folder,
-                delete_folders::delete_folders,
-            },
-            objects::{
-                multipart::{
-                    create_multipart_upload::create_multipart_upload,
-                    multipart_upload::multipart_upload,
-                    complete_multipart_upload::complete_multipart_upload,
-                    part_info_storage::STORAGE,
-                },
-                get_objects::get_objects,
-                upload_object::upload_object,
-
-            }
         }
     },
-    types::{
-        users::{
-
-        },
-        storage::{
-
-        },
-        auth_type
-    },
-    surreal::{
-        connection::get_connection,
-    },
-    minio::{
-        connection_minio::get_connection_minio
-    }
+    surreal::connection::get_connection
 };
 use crate::routes::storage::folders::move_folders::move_folders;
 use crate::routes::storage::folders::rename_folder::rename_folder;
@@ -61,8 +47,10 @@ use crate::routes::storage::objects::get_download_uri::get_download_uri;
 use crate::routes::storage::objects::move_objects::move_objects;
 use crate::routes::storage::objects::multipart::abort_multipart_upload::abort_multipart_upload;
 use crate::routes::storage::objects::rename_object::rename_object;
+use crate::routes::users::change_password::change_password;
 use crate::routes::users::edit_user::edit_user;
 use crate::routes::users::get_user_info::get_user_info;
+use crate::routes::users::reset_token::reset_token;
 
 #[launch]
 async fn rocket() -> _ {
@@ -110,5 +98,7 @@ async fn rocket() -> _ {
             rename_object,
             move_objects,
             move_folders,
+            reset_token,
+            change_password,
         ])
 }

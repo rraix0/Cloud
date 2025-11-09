@@ -61,7 +61,7 @@ export const useStorageStorage = defineStore('storage', () => {
         id: 2,
         name: 'Name',
         col_type: 3,
-        style: "w-60 md:w-100",
+        style: "w-full md:w-100",
         icon: () => {
           return sorted_by.value == 'name'
             ? ArrowUpWideNarrow
