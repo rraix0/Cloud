@@ -44,9 +44,6 @@ const uploader_store = useUploaderStorage()
       </SheetHeader>
     </SheetContent>
   </Sheet>
-
-
-
 </template>
 
 <style scoped>

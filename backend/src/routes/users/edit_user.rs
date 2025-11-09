@@ -1,11 +1,10 @@
 use std::sync::Arc;
 use rocket::{post, State};
-use rocket::form::validate::Len;
 use rocket::http::Status;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
-use surrealdb::sql::{Datetime, Thing};
+use surrealdb::sql::{Thing};
 use surrealdb::Surreal;
 use crate::guards::auth_type::AuthToken;
 use crate::types::users::user::SafeUserData;

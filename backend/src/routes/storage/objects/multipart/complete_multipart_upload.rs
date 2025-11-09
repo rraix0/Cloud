@@ -95,6 +95,7 @@ pub async fn complete_multipart_upload(
             }
         },
         Err(err) => {
+            eprintln!("Occurred an error while trying to complete multipart upload{}", err);
             let _ = client.delete_object()
               .bucket(env::var("AWS_BUCKET").unwrap())
               .key(part.key)

@@ -12,7 +12,7 @@ use crate::guards::auth_type::AuthToken;
 use crate::types::storage::object::UploadObject;
 
 #[post("/storage/upload_objects_uri", data = "<data>")]
-pub async fn upload_objects_uri(
+pub async fn upload_objects_uri( // UNUSED FN, JUST FOR EXAMPLE / FUTURE
     _db: &State<Arc<Surreal<Any>>>,
     client: &State<Arc<Client>>,
     data: Json<UploadObject>,

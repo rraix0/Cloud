@@ -111,7 +111,7 @@ pub async fn get_folders (
             (Status::InternalServerError, "Could not retrieve path directory")
         })?;
 
-    let mut result: PathStructure = match result_path_directory.take::<Vec<PathStructure>>(0) {
+    let result: PathStructure = match result_path_directory.take::<Vec<PathStructure>>(0) {
         Ok(value) => {
             value.into_iter().nth(0).unwrap()
         },

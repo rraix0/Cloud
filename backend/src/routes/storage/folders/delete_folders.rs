@@ -6,7 +6,7 @@ use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 use crate::guards::auth_type::AuthToken;
-use crate::types::storage::folder::{DeleteFolders, Folder};
+use crate::types::storage::folder::{DeleteFolders};
 
 #[post("/storage/delete_folders", data = "<data>")]
 pub async fn delete_folders (

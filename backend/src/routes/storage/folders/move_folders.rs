@@ -1,7 +1,4 @@
-use std::marker::PhantomData;
-use std::ops::Deref;
 use std::sync::Arc;
-use std::thread::current;
 use rocket::http::Status;
 use rocket::{post, State};
 use rocket::form::validate::Contains;
@@ -9,8 +6,7 @@ use rocket::serde::{Deserialize, Serialize};
 use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
-use surrealdb::{Response, Surreal};
-use surrealdb::syn::value;
+use surrealdb::{Surreal};
 use crate::guards::auth_type::AuthToken;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -40,7 +36,7 @@ pub async fn move_folders(
       (Status::InternalServerError, "Internal server error")
     })?;
 
-  let mut result: ReturnStructure = match result.take::<Vec<ReturnStructure>>(0) {
+  let result: ReturnStructure = match result.take::<Vec<ReturnStructure>>(0) {
     Ok(value) => {
       value.into_iter().nth(0).unwrap()
     },

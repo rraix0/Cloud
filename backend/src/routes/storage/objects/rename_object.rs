@@ -7,7 +7,6 @@ use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 use crate::guards::auth_type::AuthToken;
-use crate::types::storage::folder::Folder;
 use crate::types::storage::object::ObjectType;
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -52,6 +51,7 @@ pub async fn rename_object(
             }
         },
         Err(err) => {
+            eprintln!("Occurred an error while trying to rename object: {:?}", err);
             return Err((Status::InternalServerError, "Occurred an error while renaming file"));
         }
     };

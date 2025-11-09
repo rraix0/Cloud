@@ -1,4 +1,3 @@
-use std::env;
 use std::sync::Arc;
 use rocket::http::Status;
 use rocket::{post, State};
@@ -6,10 +5,8 @@ use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
-use uuid::Uuid;
-use crate::types::storage::folder::{CreateFolder, Folder, RenameFolder};
+use crate::types::storage::folder::{Folder, RenameFolder};
 use crate::guards::auth_type::AuthToken;
-use crate::types::storage::object::ObjectType;
 
 #[post("/storage/rename_folder", data = "<data>")]
 pub async fn rename_folder(
@@ -47,6 +44,7 @@ pub async fn rename_folder(
       }
     },
     Err(err) => {
+      eprintln!("Occurred an error while renaming folder: {:?}", err);
       return Err((Status::InternalServerError, "Occurred an error while renaming folder"));
     }
   };

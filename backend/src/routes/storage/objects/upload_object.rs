@@ -1,20 +1,14 @@
 use std::env;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
 use std::sync::Arc;
 use aws_sdk_s3::{Client, primitives::ByteStream};
-use image::ImageFormat;
-use image::imageops::{thumbnail, FilterType};
 use rocket::{post, FromForm, State, form::Form};
 use rocket::fs::TempFile;
 use rocket::http::Status;
 use rocket::serde::json::Json;
-use surrealdb::{Surreal, engine::any::Any, Response};
+use surrealdb::{Surreal, engine::any::Any};
 use surrealdb::sql::Bytes;
 use surrealdb::sql::Thing;
 use uuid::Uuid;
-use webp::{Encoder, WebPMemory};
 use crate::guards::auth_type::{AuthToken};
 use crate::types::storage::object::ObjectType;
 
@@ -121,6 +115,7 @@ pub async fn upload_object<'a>(
             }
         },
         Err(err) => {
+            println!("{}", err);
             let _ = client.delete_object()
               .bucket(env::var("AWS_BUCKET").unwrap())
               .key(key)
