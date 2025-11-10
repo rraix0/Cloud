@@ -60,8 +60,6 @@ import { useUploaderStorage} from '@/stores/uploaderStorage.ts'
 const storage = useStorageStorage()
 const uploader_storage = useUploaderStorage()
 
-
-
 import { toTypedSchema } from '@vee-validate/zod'
 
 import { ErrorMessage } from 'vee-validate'
@@ -101,7 +99,6 @@ const getImgFromBase64 = (thumbnail: any) => {
   return URL.createObjectURL(blob)
 }
 
-
 </script>
 
 <template>
@@ -133,13 +130,9 @@ const getImgFromBase64 = (thumbnail: any) => {
       <Button variant="outline" class="ml-2 md:ml-5" @click="() => {storage.goUp();}">
         <ChevronsUp /> Go up
       </Button>
-
       <addNewComponent />
-
       <SelectedToMoveComponent v-if="!components_manager.isPhone" />
-
       <uploadQueueComponent v-if="uploader_storage.uploadQueue.length > 0 && !components_manager.isPhone" />
-
       <Button variant="outline" class="ml-auto" @click="() => {storage.refreshData();}">
         <RefreshCcw /> Refresh
       </Button>
@@ -153,7 +146,6 @@ const getImgFromBase64 = (thumbnail: any) => {
     </div>
 
     <PathDirectoryComponent />
-
 
     <div class="rounded-md border overflow-y-auto w-full">
       <Table class="table-fixed w-full">
@@ -172,7 +164,7 @@ const getImgFromBase64 = (thumbnail: any) => {
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
-                    <!-- TABLE -->
+          <!-- TABLE -->
         <TableBody>
           <template v-if="storage.folders.length > 0 || storage.files.length > 0">
             <!-- ================== FOLDERS ================== -->
@@ -206,7 +198,7 @@ const getImgFromBase64 = (thumbnail: any) => {
                     <DropdownMenuItem @click="storage.getDownloadUri(item.id)"><Download /> Download</DropdownMenuItem>
 
                     <DropdownMenuItem>       <!-- RENAME -->
-                      <Form v-slot="{ handleSubmit }" as="" keep-values :validation-schema="schemaCreateFolder">
+                      <Form v-slot="{ handleSubmit }" keep-values :validation-schema="schemaCreateFolder">
                         <Dialog>
                           <DialogTrigger @click.stop class="flex gap-2">
                             <PencilLine /> Rename
@@ -240,7 +232,6 @@ const getImgFromBase64 = (thumbnail: any) => {
                           </DialogContent>
                         </Dialog>
                       </Form>
-
                     </DropdownMenuItem>
 
                     <DropdownMenuItem @click="() => {storage.move_objects.folders = [item]}"><Move /> Move</DropdownMenuItem>
@@ -396,9 +387,7 @@ const getImgFromBase64 = (thumbnail: any) => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
-
             </TableRow>
-
           </template>
 
           <TableRow v-else-if="storage.is_waiting_for_server">

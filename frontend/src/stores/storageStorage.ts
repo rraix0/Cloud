@@ -141,7 +141,7 @@ export const useStorageStorage = defineStore('storage', () => {
     tags: string[],
     updated_at: Date,
     user_id: Thing,
-    thumbnail: any[][] | null, // change it to bytes
+    thumbnail: number[][] | null, // change it to bytes
   }
 
   type SortedBy = 'name' | 'r_name' | 'date' | 'r_date' | 'size' | 'r_size';
