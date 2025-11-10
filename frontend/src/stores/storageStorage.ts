@@ -1,4 +1,4 @@
-import { computed, isProxy, ref, toRaw, toRefs } from 'vue'
+import { ref,} from 'vue'
 import { defineStore } from 'pinia'
 import { ArrowDownUp, ArrowUpWideNarrow, ArrowDownWideNarrow } from 'lucide-vue-next'
 import axios from 'axios'
@@ -412,7 +412,7 @@ export const useStorageStorage = defineStore('storage', () => {
         is_selecting = true;
       } else if (is_selecting && object.selected) {
         is_selecting = false;
-      } else if (is_selecting) {
+      } else if (is_selecting && object.show) {
         object.selected = true;
       }
     })
@@ -421,7 +421,7 @@ export const useStorageStorage = defineStore('storage', () => {
         is_selecting = true;
       } else if (is_selecting && object.selected) {
         is_selecting = false;
-      } else if (is_selecting) {
+      } else if (is_selecting && object.show) {
         object.selected = true;
       }
     })
