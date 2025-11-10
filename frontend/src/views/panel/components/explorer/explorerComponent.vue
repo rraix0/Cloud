@@ -197,7 +197,7 @@ const getImgFromBase64 = (thumbnail: any) => {
               <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
               <TableCell v-show="storage.headers[4]?.selected">{{  }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
-              <TableCell v-show="storage.headers[6]?.selected">
+              <TableCell v-show="storage.headers[6]?.selected" class="h-[45px] p-0 flex justify-center items-center">
                 <DropdownMenu v-model:open="item.open_dropdown_menu">
                   <DropdownMenuTrigger>
                     <Menu />
@@ -326,7 +326,7 @@ const getImgFromBase64 = (thumbnail: any) => {
               <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
               <TableCell v-show="storage.headers[4]?.selected">{{ formatBytes(item.size) }}</TableCell>
               <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
-              <TableCell v-show="storage.headers[6]?.selected">
+              <TableCell v-show="storage.headers[6]?.selected" class="h-[50px] flex justify-center items-center">
                 <DropdownMenu v-model:open="item.open_dropdown_menu">
                   <DropdownMenuTrigger>
                     <Menu />
