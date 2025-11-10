@@ -70,7 +70,7 @@ pub async fn register(
         .bind(("name", account.name.clone()))
         .bind(("password", account.password.clone()))
         .bind(("capacity", ticket.storage_capacity.clone()))
-        .bind(("jwt", Uuid::now_v7().to_string()))
+        .bind(("jwt", Uuid::new_v4().to_string()))
         .await
         .map_err(|e| {
             eprintln!("Failed to query database: {}", e);

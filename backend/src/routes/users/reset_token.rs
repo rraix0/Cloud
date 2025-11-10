@@ -16,7 +16,7 @@ pub async fn reset_token (
 ) -> Result<(Status, Json<String>), (Status, &'static str)> {
     let mut resp = db
         .query("update users set jwt = $new_jwt where id = $user_id")
-        .bind(("new_jwt", String::from(Uuid::now_v7())))
+        .bind(("new_jwt", Uuid::new_v4().to_string()))
         .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
         .await
         .map_err(|e| {
