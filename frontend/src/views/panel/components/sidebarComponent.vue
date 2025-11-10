@@ -40,6 +40,7 @@ const route = useRoute()
 </script>
 
 <template>
+  <div class="w-full h-full fixed md:hidden z-1 bg-neutral-500/25" v-show="components_manager.sidebar_open" @click="components_manager.sidebar_open = false;"></div>
   <aside
     class="z-10 fixed md:static flex flex-col h-full justify-between border-r bg-card p-4 shadow-sm w-min"
     v-show="components_manager.sidebar_open"
@@ -65,6 +66,7 @@ const route = useRoute()
           <Button
             variant="ghost"
             class="w-full justify-start gap-3"
+            @click="() => {if(components_manager.isPhone) components_manager.sidebar_open = false;}"
             :class="
               route.name === 'storage'
                 ? 'text-muted-foreground transition-colors hover:text-primary'
@@ -79,6 +81,7 @@ const route = useRoute()
           <Button
             variant="ghost"
             class="w-full justify-start gap-3"
+            @click="() => {if(components_manager.isPhone) components_manager.sidebar_open = false;}"
             :class="
               route.name === 'shared'
                 ? 'text-muted-foreground transition-colors hover:text-primary'
@@ -93,6 +96,7 @@ const route = useRoute()
           <Button
             variant="ghost"
             class="w-full justify-start gap-3"
+            @click="() => {if(components_manager.isPhone) components_manager.sidebar_open = false;}"
             :class="
               route.name === 'account'
                 ? 'text-muted-foreground transition-colors hover:text-primary'
