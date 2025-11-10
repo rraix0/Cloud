@@ -101,7 +101,7 @@ export const useStorageStorage = defineStore('storage', () => {
       id: 6,
       name: 'menu',
       col_type: 1,
-      style: "w-11 md:w-15 bg-red",
+      style: "w-12 md:w-15 bg-red",
       selected: true,
     },
     ],
