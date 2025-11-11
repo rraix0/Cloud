@@ -147,8 +147,8 @@ const getImgFromBase64 = (thumbnail: any) => {
 
     <PathDirectoryComponent />
 
-    <div class="rounded-md border overflow-y-auto w-full">
-      <Table class="table-fixed w-full">
+    <div class="rounded-md border overflow-y-auto w-full md:w-min">
+      <Table class="table-fixed w-full md:w-min">
         <TableHeader class="w-full">
           <TableRow class="w-full">
             <TableHead v-for="item in storage.headers" :key="item.id" v-show="item.selected" :class="item.style">
