@@ -5,6 +5,8 @@ import axios from 'axios'
 import { logout } from '@/views/panel/functions/logout.ts'
 import { useComponentsManager} from '@/stores/componentsManager.ts'
 
+import type { Thing, File, Folder } from "@/stores/allTypes.ts";
+
 export const useStorageStorage = defineStore('storage', () => {
   const components_storage = useComponentsManager();
   const move_objects = ref<{is_moving: boolean, files: File[], folders: Folder[]}>({is_moving: false, files: [], folders: []})
@@ -107,42 +109,9 @@ export const useStorageStorage = defineStore('storage', () => {
     ],
   )
 
-  interface Thing {
-    id: {
-      String: string
-    },
-    tb: string,
-  }
 
-  interface Folder {
-    open_dropdown_menu: boolean,
-    selected: boolean,
-    show: boolean,
-    created_at: Date,
-    id: Thing,
-    name: string,
-    parent_id: Thing,
-    share_id: [object],
-    updated_at: Date,
-    user_id: Thing,
-  }
 
-  interface File {
-    open_dropdown_menu: boolean,
-    selected: boolean,
-    show: boolean,
-    created_at: Date,
-    id: Thing,
-    metadata: object,
-    name: string,
-    parent_id: Thing,
-    share_id: [object],
-    size: number,
-    tags: string[],
-    updated_at: Date,
-    user_id: Thing,
-    thumbnail: number[][] | null, // change it to bytes
-  }
+
 
   type SortedBy = 'name' | 'r_name' | 'date' | 'r_date' | 'size' | 'r_size';
 
@@ -392,7 +361,7 @@ export const useStorageStorage = defineStore('storage', () => {
         }}
     ).then(res => {
       let data:File = res.data;
-      files.value = files.value.filter((item: Folder) => item.id != object_id);
+      files.value = files.value.filter((item: File) => item.id != object_id);
       files.value.push(data);
       sortValues(sorted_by.value);
     }).catch(err => {
@@ -540,12 +509,41 @@ export const useStorageStorage = defineStore('storage', () => {
     }
   }
 
+  const shareSomething = (object: {folder?: Folder, file?:File}) => { // TODO finish function
+    console.log(object.folder?.share_as);
+    console.log(object.folder?.share_permissions_list);
+    console.log(object.file?.share_as);
+    /*
+    axios.post(import.meta.env.VITE_API_URL + "/storage/rename_object", {
+
+      },
+      {
+        headers: {
+          Authorization: localStorage.getItem('jwt'),
+        }}
+    ).then(res => {
+      console.log(res.data);
+      refreshData();
+    }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
+      error_message.value = err.response.data;
+      console.log(err);
+      throw err;
+    })
+
+     */
+  }
+
+
+
   getFolders();
   getFiles();
 
   return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects, path, sorted_by, is_waiting_for_server,
     getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues, goTo,
     renameFolder, renameFile,
-    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory, sortValues,
+    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory, sortValues, shareSomething,
   }
 })

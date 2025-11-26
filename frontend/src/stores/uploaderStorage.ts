@@ -6,12 +6,7 @@ import { uploadFile } from '@/stores/functions/uploadFile.ts'
 import { uploadMultipartFile } from '@/stores/functions/uploadMultipartFile.ts'
 import axios from 'axios'
 import { logout } from '@/views/panel/functions/logout.ts'
-interface Thing {
-  id: {
-    String: string
-  },
-  tb: string,
-}
+import type { Thing } from '@/stores/allTypes.ts'
 export interface FileObject {
   file: File,
   upload_status: "pending"|"running"|"done"|"error"|"aborted",

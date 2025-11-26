@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUpDown, ChevronDown, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Settings, FileText, FileSpreadsheet, FileChartColumnIncreasing, Type, FileImage, FileVideo, FileAudio, FileCode, FileArchive, Box,  FileVideoCamera, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp,
+import { ArrowUpDown, ChevronDown, Link, Link2, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Settings, FileText, FileSpreadsheet, FileChartColumnIncreasing, Type, FileImage, FileVideo, FileAudio, FileCode, FileArchive, Box,  FileVideoCamera, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp,
   ChevronRight
 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
@@ -54,6 +54,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useStorageStorage } from '@/stores/storageStorage.ts'
 import { useUploaderStorage} from '@/stores/uploaderStorage.ts'
 
@@ -98,7 +104,27 @@ const getImgFromBase64 = (thumbnail: any) => {
   const blob = new Blob([uint8Array], { type: 'image/webp' })
   return URL.createObjectURL(blob)
 }
+import type {Folder as FolderType,  File as FileType} from '@/stores/allTypes.ts'
 
+// DROPDOWN MENU SHARE BUTTON LOGIC
+const getPermission = (item:FolderType | FileType, perm: string):boolean => {
+  if (item.share_permissions_list && item.share_permissions_list.includes(perm)) {
+    return true
+  } else {
+    return false
+  }
+}
+const togglePermission = (item:FolderType, perm: string) => {
+  if (item.share_permissions_list) {
+    if (item.share_permissions_list.includes(perm)) {
+      item.share_permissions_list = item.share_permissions_list.filter((x) => x != perm)
+    } else {
+      item.share_permissions_list.push(perm)
+    }
+  } else {
+    item.share_permissions_list = [perm]
+  }
+}
 </script>
 
 <template>
@@ -233,10 +259,93 @@ const getImgFromBase64 = (thumbnail: any) => {
                         </Dialog>
                       </Form>
                     </DropdownMenuItem>
-
+                      <!-- MOVE -->
                     <DropdownMenuItem @click="() => {storage.move_objects.folders = [item]}"><Move /> Move</DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>       <!-- SHARE -->
+                      <Dialog>
+                        <DialogTrigger @click.stop class="flex gap-2">
+                          <Link2 /> Share
+                        </DialogTrigger>
+                        <DialogContent class="">
+                          <DialogHeader>
+                            <DialogTitle>Share file</DialogTitle>
+                          </DialogHeader>
+                          <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-3">
+                              <span>Share by:</span>
+                              <Button @click="item.share_as = 'url'" :variant="item.share_as === undefined ? 'default' : (item.share_as == 'url' ? 'default' : 'outline')">Link</Button>
+                              <Button @click="item.share_as = 'user'" :variant="item.share_as == 'user'? 'default' : 'outline'">User</Button>
+                            </div>
+                            <div>
+                              <Input v-if="item.share_as =='user'" type="email" placeholder="User's email"></Input>
+                            </div>
+                            <div class="flex items-center gap-6">
+                              <label class="flex items-center gap-2"> <!-- Read -->
+                                <span class="select-none">Read</span>
+                                <Checkbox
+                                  :defaultValue="getPermission(item, 'read')"
+                                  @update:model-value="() => {togglePermission(item, 'read')}"
+                                ></Checkbox>
+                              </label>
+                              <label class="flex items-center gap-2"> <!-- Write -->
+                                <span class="select-none">Write</span>
+                                <Checkbox
+                                  :defaultValue="getPermission(item, 'write')"
+                                  @update:model-value="() => {togglePermission(item, 'write')}"
+                                ></Checkbox>
+                              </label>
+                              <label class="flex items-center gap-2"> <!-- Delete -->
+                                <span class="select-none">Delete</span>
+                                <Checkbox
+                                  :defaultValue="getPermission(item, 'delete')"
+                                  @update:model-value="() => {togglePermission(item, 'delete')}"
+                                ></Checkbox>
+                              </label>
+                              <label class="flex items-center gap-2"> <!-- Recursive -->
+                                <span>
+                                    <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger >
+                                          <label for="some_label" class="select-none">Recursive</label>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        With subfolders
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </span>
+                                <Checkbox
+                                  :defaultValue="getPermission(item, 'recursive')"
+                                  @update:model-value="() => {togglePermission(item, 'recursive')}"
+                                  id="some_label"
+                                ></Checkbox>
+                              </label>
+                            </div>
+                          </div>
+                          <DialogDescription class="">
+                            <span v-if="item.share_as == 'user'">Make sure that email is correct.</span>
+                            <span v-else>Everybody with this link might get access to your folder.</span>
+                            <br>Make sure to assign the appropriate permissions to ensure giving correct level of access.
+                          </DialogDescription>
+
+                          <DialogFooter>
+                            <DialogClose>
+                              <Button variant="outline" @click="item.open_dropdown_menu = false">
+                                Cancel
+                              </Button>
+                            </DialogClose>
+                            <DialogClose>
+                              <Button type="submit" form="dialogForm" @click="() => {item.open_dropdown_menu = false; storage.shareSomething({folder: item})}">
+                                Share
+                              </Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />        <!-- DELETE -->
                     <DropdownMenuItem class="text-red-500">
                       <AlertDialog>
                         <AlertDialogTrigger @click.stop class="w-full flex gap-2">
@@ -363,6 +472,69 @@ const getImgFromBase64 = (thumbnail: any) => {
                     </DropdownMenuItem>
 
                     <DropdownMenuItem @click="() => {storage.move_objects.files = [item]; storage.move_objects.is_moving = true; }"><Move /> Move</DropdownMenuItem>
+
+                    <DropdownMenuItem>       <!-- SHARE -->
+                      <Dialog>
+                        <DialogTrigger @click.stop class="flex gap-2">
+                          <Link2 /> Share
+                        </DialogTrigger>
+                        <DialogContent class="">
+                          <DialogHeader>
+                            <DialogTitle>Share file</DialogTitle>
+                          </DialogHeader>
+                          <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-3">
+                              <span>Share by:</span>
+                              <Button @click="item.share_as = 'url'" :variant="item.share_as === undefined ? 'default' : (item.share_as == 'url' ? 'default' : 'outline')">Link</Button>
+                              <Button @click="item.share_as = 'user'" :variant="item.share_as == 'user'? 'default' : 'outline'">User</Button>
+                            </div>
+                            <div>
+                              <Input v-if="item.share_as =='user'" type="email" placeholder="User's email"></Input>
+                            </div>
+                            <div class="flex items-center gap-6">
+                              <label class="flex items-center gap-2"> <!-- Read -->
+                                <span class="select-none">Read</span>
+                                <Checkbox
+                                  :defaultValue="getPermission(item, 'read')"
+                                  @update:model-value="() => {togglePermission(item, 'read')}"
+                                ></Checkbox>
+                              </label>
+                              <label class="flex items-center gap-2"> <!-- Write -->
+                                <span class="select-none">Write</span>
+                                <Checkbox
+                                  :defaultValue="getPermission(item, 'write')"
+                                  @update:model-value="() => {togglePermission(item, 'write')}"
+                                ></Checkbox>
+                              </label>
+                              <label class="flex items-center gap-2"> <!-- Delete -->
+                                <span class="select-none">Delete</span>
+                                <Checkbox
+                                  :defaultValue="getPermission(item, 'delete')"
+                                  @update:model-value="() => {togglePermission(item, 'delete')}"
+                                ></Checkbox>
+                              </label>
+                            </div>
+                          </div>
+                          <DialogDescription class="">
+                            <span v-if="item.share_as == 'user'">Make sure that email is correct.</span>
+                            <span v-else>Everybody with this link might get access to your folder.</span>
+                            <br>Make sure to assign the appropriate permissions to ensure giving correct level of access.
+                          </DialogDescription>
+                          <DialogFooter>
+                            <DialogClose>
+                              <Button variant="outline" @click="item.open_dropdown_menu = false">
+                                Cancel
+                              </Button>
+                            </DialogClose>
+                            <DialogClose>
+                              <Button type="submit" form="dialogForm" @click="() => {item.open_dropdown_menu = false; storage.shareSomething({file: item})}">
+                                Share
+                              </Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-red-500"> <!-- DELETE -->

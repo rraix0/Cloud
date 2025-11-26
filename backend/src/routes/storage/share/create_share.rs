@@ -11,14 +11,14 @@ use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 use uuid::Uuid;
 use surrealdb::sql::Datetime;
-use crate::types::share::shared::Shared;
+use crate::types::share::shared::{Shared, PERMISSIONS};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct CreateShare {
     pub description: Option<String>,
     pub file_id: Option<Thing>,
     pub folder_id: Option<Thing>,
-    pub permissions: i64,
+    pub permissions: Vec<String>,
     pub share_user_id: Option<Thing>,
     pub expiration_time: Option<chrono::DateTime<chrono::Utc>>
 }
@@ -36,6 +36,11 @@ pub async fn create_share(
     if !((data.file_id.is_some() && data.folder_id.is_none())
         || (data.file_id.is_none() && data.folder_id.is_some())) {
         return Err((Status::BadRequest, "No object has been specified to be shared."));
+    }
+
+    let permissions = PERMISSIONS.read().unwrap().clone();
+    if !data.permissions.iter().all(|x| permissions.contains(x)) {
+        return Err((Status::BadRequest, "Permissions are incorrect."));
     }
 
         let link_token:String = Uuid::new_v4().to_string();

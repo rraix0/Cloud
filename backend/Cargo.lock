@@ -815,6 +815,7 @@ dependencies = [
  "dotenvy",
  "image",
  "jsonwebtoken 10.1.0",
+ "once_cell",
  "rocket",
  "rocket_cors",
  "serde",
