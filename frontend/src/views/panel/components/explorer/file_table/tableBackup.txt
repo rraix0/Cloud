@@ -1,179 +1,6 @@
-<script setup lang="ts">
-import { ArrowUpDown, ChevronDown, Link, Link2, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Settings, FileText, FileSpreadsheet, FileChartColumnIncreasing, Type, FileImage, FileVideo, FileAudio, FileCode, FileArchive, Box,  FileVideoCamera, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp,
-  ChevronRight
-} from 'lucide-vue-next'
-import { computed, ref } from 'vue'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Spinner } from '@/components/ui/spinner'
-import {
-  Dialog,
-  DialogContent,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { useStorageStorage } from '@/stores/storageStorage.ts'
-import { useUploaderStorage} from '@/stores/uploaderStorage.ts'
 
-const storage = useStorageStorage()
-const uploader_storage = useUploaderStorage()
 
-import { toTypedSchema } from '@vee-validate/zod'
-
-import { ErrorMessage } from 'vee-validate'
-import UploadFilesComponent from '@/views/panel/components/small_components/uploadFilesComponent.vue'
-import AddNewComponent from '@/views/panel/components/small_components/addNewComponent.vue'
-import * as z from 'zod'
-import ColumnsDropDownMenuComopnent from '@/views/panel/components/small_components/columnsDropDownMenuComopnent.vue'
-import UploadQueueComponent from '@/views/panel/components/small_components/uploadQueueComponent.vue'
-import SelectedItemsMenu from '@/views/panel/components/small_components/selectedItemsMenu.vue'
-import SelectedToMoveComponent from '@/views/panel/components/small_components/selectedToMoveComponent.vue'
-import PathDirectoryComponent from '@/views/panel/components/small_components/pathDirectoryComponent.vue'
-import { useComponentsManager} from '@/stores/componentsManager.ts'
-const components_manager = useComponentsManager();
-
-function formatBytes(bytes:number) {
-  if (bytes === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-  const exponent = Math.floor(Math.log(bytes) / Math.log(1024));
-  const size = bytes / Math.pow(1024, exponent);
-  return `${size.toFixed(2)} ${units[exponent]}`;
-}
-const allSelected = computed({
-  get: () => storage.folders.every(item => item.selected) && storage.files.every(item => item.selected),
-  set: (value: boolean) => {
-    storage.folders.forEach(item => item.selected = value);
-    storage.files.forEach(item => item.selected = value);
-  }
-});
-
-const schemaCreateFolder = toTypedSchema(z.object({
-  name: z.string().min(2).max(50),
-}));
-
-const getImgFromBase64 = (thumbnail: any) => {
-  const uint8Array = new Uint8Array(thumbnail)
-  const blob = new Blob([uint8Array], { type: 'image/webp' })
-  return URL.createObjectURL(blob)
-}
-import type {Folder as FolderType,  File as FileType} from '@/stores/allTypes.ts'
-
-// DROPDOWN MENU SHARE BUTTON LOGIC
-const getPermission = (item:FolderType | FileType, perm: string):boolean => {
-  if (item.share_permissions_list && item.share_permissions_list.includes(perm)) {
-    return true
-  } else {
-    return false
-  }
-}
-const togglePermission = (item:FolderType, perm: string) => {
-  if (item.share_permissions_list) {
-    if (item.share_permissions_list.includes(perm)) {
-      item.share_permissions_list = item.share_permissions_list.filter((x) => x != perm)
-    } else {
-      item.share_permissions_list.push(perm)
-    }
-  } else {
-    item.share_permissions_list = [perm]
-  }
-}
-</script>
-
-<template>
-  <div class="h-full max-h-full overflow-auto md:px-3">
-    <div class="flex flex-col gap-2">
-      <span v-if="storage.error_message" class="flex w-full border border-red-500 rounded-md p-1 text-center text-red-400 font-bold pl-3">
-        {{ storage.error_message }}
-        <CircleX class="ml-auto mr-1 hover:text-white hover:cursor-pointer" @click="storage.error_message = ''" />
-      </span>
-      <span v-if="storage.info_message" class="flex w-full border border-green-500 rounded-md p-1 text-center text-green-400 font-bold pl-3">
-        {{ storage.info_message }}
-        <CircleX class="ml-auto mr-1 hover:text-white hover:cursor-pointer" @click="storage.info_message = ''" />
-      </span>
-    </div>
-    <div class="flex items-center pt-2 md:hidden" v-show="components_manager.filter_files_input">
-      <!-- PHONE -->
-      <Input class="max-w-sm md:hidden" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
-      <Button variant="outline" class="p-0 ml-2" @click="components_manager.toggleFilterInputPhone(); storage.filterValues('')"><circle-x /></Button>
-    </div>
-
-    <div class="flex items-center py-3">
-      <!-- PHONE -->
-      <Button class="md:hidden" @click="components_manager.toggleSidebarOpen()" variant="outline"><ChevronRight class="h-5 w-5" /></Button>
-      <SelectedItemsMenu v-if="!components_manager.isPhone" />
-
-      <!-- PC -->
-      <Input class="max-w-sm hidden md:block" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
-
-      <Button variant="outline" class="ml-2 md:ml-5" @click="() => {storage.goUp();}">
-        <ChevronsUp /> Go up
-      </Button>
-      <addNewComponent />
-      <SelectedToMoveComponent v-if="!components_manager.isPhone" />
-      <uploadQueueComponent v-if="uploader_storage.uploadQueue.length > 0 && !components_manager.isPhone" />
-      <Button variant="outline" class="ml-auto" @click="() => {storage.refreshData();}">
-        <RefreshCcw /> Refresh
-      </Button>
-
-      <ColumnsDropDownMenuComopnent class="hidden md:block" />
-    </div>
-    <div class="flex items-center">
-      <SelectedItemsMenu v-if="components_manager.isPhone" />
-      <SelectedToMoveComponent v-if="components_manager.isPhone" />
-      <uploadQueueComponent v-if="uploader_storage.uploadQueue.length > 0 && components_manager.isPhone" />
-    </div>
-
-    <PathDirectoryComponent />
-
-    <div class="rounded-md border overflow-y-auto w-full md:w-min">
+<div class="rounded-md border overflow-y-auto w-full md:w-min">
       <Table class="table-fixed w-full md:w-min">
         <TableHeader class="w-full">
           <TableRow class="w-full">
@@ -322,6 +149,27 @@ const togglePermission = (item:FolderType, perm: string) => {
                                 ></Checkbox>
                               </label>
                             </div>
+                            <div>
+                              <Popover v-slot="{ close }">
+                                <PopoverTrigger as-child>
+                                  <Button
+                                    variant="outline"
+                                    class="w-[240px] justify-start text-left font-normal"
+                                  >
+                                    <CalendarIcon />
+                                    {{ share_expiration_date ? share_expiration_date : "Pick a date" }}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent class="w-auto p-0" align="start">
+                                  <Calendar
+                                    v-model="share_expiration_date"
+                                    layout="month-and-year"
+                                    initial-focus
+                                    @update:model-value="close"
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            </div>
                           </div>
                           <DialogDescription class="">
                             <span v-if="item.share_as == 'user'">Make sure that email is correct.</span>
@@ -336,7 +184,7 @@ const togglePermission = (item:FolderType, perm: string) => {
                               </Button>
                             </DialogClose>
                             <DialogClose>
-                              <Button type="submit" form="dialogForm" @click="() => {item.open_dropdown_menu = false; storage.shareSomething({folder: item})}">
+                              <Button type="submit" form="dialogForm" @click="() => {item.open_dropdown_menu = false; storage.shareSomething({folder: item, expiration_date: toDate(share_expiration_date)})}">
                                 Share
                               </Button>
                             </DialogClose>
@@ -514,6 +362,27 @@ const togglePermission = (item:FolderType, perm: string) => {
                                 ></Checkbox>
                               </label>
                             </div>
+                            <div>
+                              <Popover v-slot="{ close }">
+                                <PopoverTrigger as-child>
+                                  <Button
+                                    variant="outline"
+                                    class="w-[240px] justify-start text-left font-normal"
+                                  >
+                                    <CalendarIcon />
+                                    {{ share_expiration_date ? share_expiration_date : "Pick a date" }}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent class="w-auto p-0" align="start">
+                                  <Calendar
+                                    v-model="share_expiration_date"
+                                    layout="month-and-year"
+                                    initial-focus
+                                    @update:model-value="close"
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            </div>
                           </div>
                           <DialogDescription class="">
                             <span v-if="item.share_as == 'user'">Make sure that email is correct.</span>
@@ -527,7 +396,7 @@ const togglePermission = (item:FolderType, perm: string) => {
                               </Button>
                             </DialogClose>
                             <DialogClose>
-                              <Button type="submit" form="dialogForm" @click="() => {item.open_dropdown_menu = false; storage.shareSomething({file: item})}">
+                              <Button type="submit" form="dialogForm" @click="() => {item.open_dropdown_menu = false; storage.shareSomething({file: item, expiration_date: share_expiration_date})}">
                                 Share
                               </Button>
                             </DialogClose>
@@ -574,5 +443,3 @@ const togglePermission = (item:FolderType, perm: string) => {
         </TableBody>
       </Table>
     </div>
-  </div>
-</template>

@@ -5,7 +5,9 @@ import axios from 'axios'
 import { logout } from '@/views/panel/functions/logout.ts'
 import { useComponentsManager} from '@/stores/componentsManager.ts'
 
-import type { Thing, File, Folder } from "@/stores/allTypes.ts";
+import type { Thing, File, Folder, ShareData } from '@/stores/allTypes.ts'
+import type { DateValue } from '@internationalized/date'
+import { toDate } from 'reka-ui/date'
 
 export const useStorageStorage = defineStore('storage', () => {
   const components_storage = useComponentsManager();
@@ -44,6 +46,7 @@ export const useStorageStorage = defineStore('storage', () => {
         break;
     }
   }
+
   const headers = ref([
       {
         id: 0,
@@ -97,7 +100,7 @@ export const useStorageStorage = defineStore('storage', () => {
       name: 'shared',
       col_type: 1,
       style: "w-10 md:w-15",
-      selected: false,
+      selected: true,
       },
     {
       id: 6,
@@ -106,11 +109,8 @@ export const useStorageStorage = defineStore('storage', () => {
       style: "w-12 md:w-15 bg-red",
       selected: true,
     },
-    ],
+    ]
   )
-
-
-
 
 
   type SortedBy = 'name' | 'r_name' | 'date' | 'r_date' | 'size' | 'r_size';
@@ -381,18 +381,20 @@ export const useStorageStorage = defineStore('storage', () => {
         is_selecting = true;
       } else if (is_selecting && object.selected) {
         is_selecting = false;
-      } else if (is_selecting && object.show) {
+      } else if (is_selecting && object.show != false) {
         object.selected = true;
       }
+      console.log(index, is_selecting, object.selected);
     })
     files.value.forEach((object: File, index) => {
       if (!is_selecting && object.selected) {
         is_selecting = true;
       } else if (is_selecting && object.selected) {
         is_selecting = false;
-      } else if (is_selecting && object.show) {
+      } else if (is_selecting && object.show != false) {
         object.selected = true;
       }
+      console.log(index, is_selecting, object.selected);
     })
   }
 
@@ -509,12 +511,20 @@ export const useStorageStorage = defineStore('storage', () => {
     }
   }
 
-  const shareSomething = (object: {folder?: Folder, file?:File}) => { // TODO finish function
-    console.log(object.folder?.share_as);
-    console.log(object.folder?.share_permissions_list);
-    console.log(object.file?.share_as);
-    /*
-    axios.post(import.meta.env.VITE_API_URL + "/storage/rename_object", {
+  const shareSomething = (object: {folder?: Folder, file?:File, share_data: ShareData}) => { // TODO finish function
+
+    console.log(object);
+    console.log(object.share_data?.share_permissions_list);
+    console.log(object.share_data?.share_as);
+    console.log(object.share_data?.share_expiration_date);
+
+    axios.post(import.meta.env.VITE_API_URL + "/share/create_share", {
+      description: object.share_data.share_description,
+      file_id: object.file?.id,
+      folder_id: object.folder?.id,
+      permissions: object.share_data?.share_permissions_list,
+      share_user_id: object.share_data?.share_user_email,
+      expiration_time: object.share_data?.share_expiration_date ? toDate(object.share_data?.share_expiration_date) : null,
 
       },
       {
@@ -532,8 +542,6 @@ export const useStorageStorage = defineStore('storage', () => {
       console.log(err);
       throw err;
     })
-
-     */
   }
 
 

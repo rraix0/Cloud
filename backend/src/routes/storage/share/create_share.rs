@@ -19,7 +19,7 @@ pub struct CreateShare {
     pub file_id: Option<Thing>,
     pub folder_id: Option<Thing>,
     pub permissions: Vec<String>,
-    pub share_user_id: Option<Thing>,
+    pub share_user_email: Option<String>,
     pub expiration_time: Option<chrono::DateTime<chrono::Utc>>
 }
 
@@ -43,80 +43,80 @@ pub async fn create_share(
         return Err((Status::BadRequest, "Permissions are incorrect."));
     }
 
-        let link_token:String = Uuid::new_v4().to_string();
-        let expiration_time:Option<Datetime> = match data.expiration_time {
-            Some(date) => {
-                Some(Datetime::from(date))
-            }
-            None => {
-                None
-            }
-        };
-
-        let mut query = "".to_string();
-        query += "{";
-
-        if data.file_id.is_some() {
-            query.push_str("LET $if_exist = select id from $file_id;");
-        } else {
-            query.push_str("LET $if_exist = select id from $folder_id;");
+    let link_token:String = Uuid::new_v4().to_string();
+    let expiration_time:Option<Datetime> = match data.expiration_time {
+        Some(date) => {
+            Some(Datetime::from(date))
         }
-        query.push_str("
-        if $if_exist {
-        let $response = insert into shared (id, description, expiration_date, file_id, folder_id, link_token, permissions, share_user_id, user_id)
-            values ($id, $description, $expiration_date, $file_id, $folder_id, $link_token, $permissions, $share_user_id, $user_id); ");
-
-        if data.file_id.is_some() {
-            query.push_str("update files set share_id += $share_id_thing
-            where id = $file_id
-            and user_id = $user_id;");
-        } else {
-            query.push_str("update files set share_id += $share_id_thing
-            where id = $folder_id
-            and user_id = $user_id;");
+        None => {
+            None
         }
+    };
 
-        query.push_str("return $response; }}");
+    let mut query = "".to_string();
+    query += "{";
 
-        println!("{}", query);
+    if data.file_id.is_some() {
+        query.push_str("LET $if_exist = select id from $file_id;");
+    } else if data.folder_id.is_some() {
+        query.push_str("LET $if_exist = select id from $folder_id;");
+    }
+    query.push_str("
+    if $if_exist {
+    let $response = insert into shared (id, description, expiration_date, file_id, folder_id, link_token, permissions, share_user_id, user_id)
+        values ($id, $description, $expiration_date, $file_id, $folder_id, $link_token, $permissions, $share_user_id, $user_id); ");
 
-        let share_id = Uuid::now_v7().to_string();
+    if data.file_id.is_some() {
+        query.push_str("update files set share_id += $share_id_thing
+        where id = $file_id
+        and user_id = $user_id;");
+    } else if data.folder_id.is_some() {
+        query.push_str("update folders set share_id += $share_id_thing
+        where id = $folder_id
+        and user_id = $user_id;");
+    }
 
-        let mut result = db
-            .query(query)
-            .bind(("id", share_id.clone()))
-            .bind(("share_id_thing", Thing::from(("shared", share_id.to_string().as_ref()))))
-            .bind(("description", data.description.clone()))
-            .bind(("expiration_date", expiration_time))
-            .bind(("file_id", data.file_id.clone()))
-            .bind(("folder_id", data.folder_id.clone()))
-            .bind(("link_token", link_token))
-            .bind(("permissions", data.permissions.clone()))
-            .bind(("share_user_id", data.share_user_id.clone()))
-            .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
-            .await
-            .map_err(|err| {
-                eprintln!("{}", err);
-                (Status::InternalServerError, "Internal server error")
-            })?;
+    query.push_str("return $response; }}");
 
-        let shared:Shared = match result.take::<Vec<Shared>>(0) {
-            Ok(object) => {
-                let obj: Shared = match object.get(0) {
-                    None => {
-                        return Err((Status::InternalServerError, "Occurred an error while trying to share data."));
-                    }
-                    Some(obj) => {
-                        obj.to_owned()
-                    }
-                };
-                obj
-            }
-            Err(err) => {
-                eprintln!("{}", err);
-                return Err((Status::InternalServerError, "Occurred an error while trying to share data."));
-            }
-        };
+    println!("{}", query);
+
+    let share_id = Uuid::now_v7().to_string();
+
+    let mut result = db
+        .query(query)
+        .bind(("id", share_id.clone()))
+        .bind(("share_id_thing", Thing::from(("shared", share_id.to_string().as_ref()))))
+        .bind(("description", data.description.clone()))
+        .bind(("expiration_date", expiration_time))
+        .bind(("file_id", data.file_id.clone()))
+        .bind(("folder_id", data.folder_id.clone()))
+        .bind(("link_token", link_token))
+        .bind(("permissions", data.permissions.clone()))
+        .bind(("share_user_id", data.share_user_email.clone()))
+        .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
+        .await
+        .map_err(|err| {
+            eprintln!("{}", err);
+            (Status::InternalServerError, "Internal server error")
+        })?;
+
+    let shared:Shared = match result.take::<Vec<Shared>>(0) {
+        Ok(object) => {
+            let obj: Shared = match object.get(0) {
+                None => {
+                    return Err((Status::InternalServerError, "Occurred an error while trying to share data."));
+                }
+                Some(obj) => {
+                    obj.to_owned()
+                }
+            };
+            obj
+        }
+        Err(err) => {
+            eprintln!("{}", err);
+            return Err((Status::InternalServerError, "Occurred an error while trying to share data."));
+        }
+    };
 
     Ok((Status::Ok, Json(shared)))
 }

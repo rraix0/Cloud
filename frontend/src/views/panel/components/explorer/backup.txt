@@ -1,0 +1,52 @@
+    <div class="flex flex-col gap-2">
+      <span v-if="storage.error_message" class="flex w-full border border-red-500 rounded-md p-1 text-center text-red-400 font-bold pl-3">
+        {{ storage.error_message }}
+        <CircleX class="ml-auto mr-1 hover:text-white hover:cursor-pointer" @click="storage.error_message = ''" />
+      </span>
+      <span v-if="storage.info_message" class="flex w-full border border-green-500 rounded-md p-1 text-center text-green-400 font-bold pl-3">
+        {{ storage.info_message }}
+        <CircleX class="ml-auto mr-1 hover:text-white hover:cursor-pointer" @click="storage.info_message = ''" />
+      </span>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <div class="flex items-center pt-2 md:hidden" v-show="components_manager.filter_files_input">
+      <!-- PHONE -->
+      <Input class="max-w-sm md:hidden" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
+      <Button variant="outline" class="p-0 ml-2" @click="components_manager.toggleFilterInputPhone(); storage.filterValues('')"><circle-x /></Button>
+    </div>
+
+    <div class="flex items-center py-3">
+      <!-- PHONE -->
+      <Button class="md:hidden" @click="components_manager.toggleSidebarOpen()" variant="outline"><ChevronRight class="h-5 w-5" /></Button>
+      <SelectedItemsMenu v-if="!components_manager.isPhone" />
+
+      <!-- PC -->
+      <Input class="max-w-sm hidden md:block" placeholder="Filter files..." @input="storage.filterValues($event.target.value)" />
+
+      <Button variant="outline" class="ml-2 md:ml-5" @click="() => {storage.goUp();}">
+        <ChevronsUp /> Go up
+      </Button>
+      <addNewComponent />
+      <SelectedToMoveComponent v-if="!components_manager.isPhone" />
+      <uploadQueueComponent v-if="uploader_storage.uploadQueue.length > 0 && !components_manager.isPhone" />
+      <Button variant="outline" class="ml-auto" @click="() => {storage.refreshData();}">
+        <RefreshCcw /> Refresh
+      </Button>
+
+      <ColumnsDropDownMenuComopnent class="hidden md:block" />
+    </div>
+    <div class="flex items-center">
+      <SelectedItemsMenu v-if="components_manager.isPhone" />
+      <SelectedToMoveComponent v-if="components_manager.isPhone" />
+      <uploadQueueComponent v-if="uploader_storage.uploadQueue.length > 0 && components_manager.isPhone" />
+    </div>

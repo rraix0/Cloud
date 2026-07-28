@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import explorerComponent from '../components/explorer/explorerComponent.vue';
+import MainExplorerComponent from '../components/explorer/mainExplorerComponent.vue';
 
 </script>
 
 <template>
   <div class="w-full h-screen flex flex-col">
-      <explorerComponent />
+      <MainExplorerComponent />
   </div>
 
 

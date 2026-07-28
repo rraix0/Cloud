@@ -8,7 +8,7 @@ use surrealdb::sql::{Bytes, Object, Thing};
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Shared {
     pub description: Option<String>,
-    pub expiration_date: Datetime,
+    pub expiration_date: Option<Datetime>,
     pub file_id: Option<Thing>,
     pub folder_id: Option<Thing>,
     pub id: Thing,
