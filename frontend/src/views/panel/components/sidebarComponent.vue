@@ -29,7 +29,7 @@ import { useTemplateRef } from 'vue'
 
 
 
-const storage= useStorageStorage();
+const storage = useStorageStorage();
 const components_manager = useComponentsManager()
 const route = useRoute()
 

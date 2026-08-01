@@ -5,11 +5,15 @@ import axios from 'axios'
 import { logout } from '@/views/panel/functions/logout.ts'
 import { useComponentsManager} from '@/stores/componentsManager.ts'
 
-import type { Thing, File, Folder, ShareData } from '@/stores/allTypes.ts'
+import type { Thing, File, Folder, ShareDataForm, SharedData } from '@/stores/allTypes.ts'
 import type { DateValue } from '@internationalized/date'
 import { toDate } from 'reka-ui/date'
+import { useRoute } from 'vue-router'
+
+
 
 export const useStorageStorage = defineStore('storage', () => {
+  const route = useRoute();
   const components_storage = useComponentsManager();
   const move_objects = ref<{is_moving: boolean, files: File[], folders: Folder[]}>({is_moving: false, files: [], folders: []})
 
@@ -128,6 +132,9 @@ export const useStorageStorage = defineStore('storage', () => {
   const files = ref<File[]>([]);
   const path = ref<FolderTreeElement[]>([])
 
+  const share_token = route.params.token ? route.params.token : undefined;
+  console.log(share_token);
+
   const current_folder_parent = ref<Folder>();
 
   const getFolders = (parent_id: object | undefined = undefined) => {
@@ -164,6 +171,7 @@ export const useStorageStorage = defineStore('storage', () => {
     files.value = [];
     axios.post(import.meta.env.VITE_API_URL + "/storage/get_objects", {
         parent_id: parent_id,
+        share_token: share_token,
       },
       {
         headers: {
@@ -511,7 +519,7 @@ export const useStorageStorage = defineStore('storage', () => {
     }
   }
 
-  const shareSomething = (object: {folder?: Folder, file?:File, share_data: ShareData}) => { // TODO finish function
+  const shareSomething = (object: {folder?: Folder, file?:File, share_data: ShareDataForm}) => {
 
     console.log(object);
     console.log(object.share_data?.share_permissions_list);
@@ -544,14 +552,50 @@ export const useStorageStorage = defineStore('storage', () => {
     })
   }
 
+  const deleteShare = (share_id: Thing) => {
+
+    axios.post(import.meta.env.VITE_API_URL + "/share/create_share", {
+        id: share_id
+      },
+      {
+        headers: {
+          Authorization: localStorage.getItem('jwt'),
+        }}
+    ).then(res => {
+      refreshData();
+    }).catch(err => {
+      if (err.status === 401) {
+        logout()
+      }
+      error_message.value = err.response.data;
+      console.log(err);
+      throw err;
+    })
+  }
+
+  const copyShareLink = (share: SharedData) => {
+    console.log(share)
+
+    let url = window.location.origin + "/panel/storage/" + share.link_token;
+    navigator.clipboard.writeText(url);
+    share.link_copied = true;
+    setTimeout(() => {
+      share.link_copied = false;
+    }, 5000)
+
+  }
 
 
-  getFolders();
-  getFiles();
+  if (!share_token) {
+    getFolders();
+  }
+    getFiles();
+
+
 
   return { folders, files, current_folder_parent, headers, error_message, info_message, move_objects, path, sorted_by, is_waiting_for_server,
     getFolders, getFiles, goUp, getDownloadUri, createFolder, deleteFolders, deleteFiles, refreshData, filterValues, goTo,
     renameFolder, renameFile,
-    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory, sortValues, shareSomething,
+    selectBetween, selectedDownload, selectedToMove, selectedDelete, moveToDirectory, sortValues, shareSomething, deleteShare, copyShareLink,
   }
 })

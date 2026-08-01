@@ -8,14 +8,17 @@ import {
   FileChartColumnIncreasing,
   Type,
   FileImage,
+  Eye,
+  Pencil,
   FileVideo,
   FileAudio,
   FileCode,
+  ClipboardCheck,
+  Trash2,
   FileArchive,
   Box,
   File,
   Menu,
-  Trash,
   Download,
   PencilLine,
   Move,
@@ -108,12 +111,12 @@ const getImgFromBase64 = (thumbnail: any) => {
   const blob = new Blob([uint8Array], { type: 'image/webp' })
   return URL.createObjectURL(blob)
 }
-import type { Folder as FolderType, File as FileType, ShareData } from '@/stores/allTypes.ts'
+import type { Folder as FolderType, File as FileType, ShareDataForm } from '@/stores/allTypes.ts'
 import { toDate } from 'reka-ui/date'
 
 
 
-const share_data: ShareData = {
+const share_data: ShareDataForm = {
   share_as: 'url',
   share_permissions_list: ['read'],
   share_description: "",
@@ -140,7 +143,9 @@ const togglePermission = (perm: string) => {
   }
 }
 
-
+async function copyLink(url: string) {
+  await navigator.clipboard.writeText(url);
+}
 
 </script>
 
@@ -198,7 +203,118 @@ const togglePermission = (perm: string) => {
     </TableCell>
     <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
     <TableCell v-show="storage.headers[4]?.selected">{{ formatBytes(item.size) }}</TableCell>
-    <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
+    <TableCell v-show="storage.headers[5]?.selected">
+      <div class="flex items-center">
+
+
+      <Dialog v-if="item.share?.length">
+        <DialogTrigger>
+          <Link2 />
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>This file <span class="text-muted-foreground p-1">{{ item.name }}</span> is shared:</DialogTitle>
+            <DialogDescription>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead class="w-[100px]">Description</TableHead>
+                    <TableHead class="w-[100px]">Permissions</TableHead>
+                    <TableHead>Expire at</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead class="text-right"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow v-for="share in item.share">
+                    <TableCell class="font-medium">
+                      {{ share.description }}
+                    </TableCell>
+                    <TableCell class="font-medium">
+                      <div class=" flex gap-1">
+                        <Eye v-if="share.permissions.includes('read')" />
+                        <Pencil v-if="share.permissions.includes('write')" />
+                        <Trash2 v-if="share.permissions.includes('delete')" />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span v-if="share.expiration_date">{{ share.expiration_date }}</span>
+                      <span v-else>ー</span>
+                    </TableCell>
+                    <TableCell>
+                      <div class="flex gap-2 items-center">
+                        <Button v-if="share.link_token" variant="outline" @click="storage.copyShareLink(share)">
+                          <Link2 v-if="!share.link_copied" />
+                          <ClipboardCheck v-else />
+                          copy
+                        </Button>
+                      </div>
+
+                    </TableCell>
+
+                    <TableCell>
+                      <div class="w-full flex justify-end items-center gap-2">
+
+                        <!-- EDIT SHARE
+                        <AlertDialog>
+                          <AlertDialogTrigger>
+                            <PencilLine />
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Editing share</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Feature will be available in the future
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction @click="">Update</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        -->
+                        <!-- DELETE SHARE -->
+                        <AlertDialog>
+                          <AlertDialogTrigger>
+                            <Trash2 class="text-red-500" />
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete share?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction class="text-white bg-red-500 hover:bg-red-400" @click=""><Trash2 class="text-white" /> Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+
+                  </TableRow>
+                </TableBody>
+              </Table>
+
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose as-child>
+              <Button variant="outline">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </div>
+
+
+    </TableCell>
     <TableCell v-show="storage.headers[6]?.selected" class="h-[50px] flex justify-center items-center">
       <DropdownMenu v-model:open="item.open_dropdown_menu">
         <DropdownMenuTrigger>
@@ -365,7 +481,7 @@ const togglePermission = (perm: string) => {
           <DropdownMenuItem class="text-red-500">
             <AlertDialog>
               <AlertDialogTrigger @click.stop class="w-full flex gap-2">
-                <Trash class="text-red-500" /> Delete
+                <Trash2 class="text-red-500" /> Delete
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>

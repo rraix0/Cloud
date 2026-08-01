@@ -85,14 +85,14 @@ const schemaCreateFolder = toTypedSchema(z.object({
   name: z.string().min(2).max(50),
 }));
 
-import type {Folder as FolderType,  File as FileType, ShareData} from '@/stores/allTypes.ts'
+import type {Folder as FolderType,  File as FileType, ShareDataForm} from '@/stores/allTypes.ts'
 import { toDate } from 'reka-ui/date'
 import { Separator } from '@/components/ui/separator'
 import { CalendarDate } from '@internationalized/date'
 import type { DateValue } from "@internationalized/date";
 
 
-const share_data =ref<ShareData>( {
+const share_data =ref<ShareDataForm>( {
   share_as: 'url',
   share_permissions_list: ['read'],
   share_description: "",

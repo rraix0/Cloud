@@ -1,5 +1,6 @@
 import router from '@/router'
 import { useStorageStorage } from '@/stores/storageStorage.ts'
+import { useRoute } from 'vue-router'
 
 export const logout = () => {
   const storage = useStorageStorage();
@@ -9,5 +10,4 @@ export const logout = () => {
   localStorage.removeItem('user_id')
   localStorage.removeItem('jwt')
   localStorage.clear()
-  router.push('/')
 }

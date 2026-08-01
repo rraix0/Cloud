@@ -48,6 +48,7 @@ use crate::routes::storage::objects::move_objects::move_objects;
 use crate::routes::storage::objects::multipart::abort_multipart_upload::abort_multipart_upload;
 use crate::routes::storage::objects::rename_object::rename_object;
 use crate::routes::storage::share::create_share::create_share;
+use crate::routes::storage::share::delete_share::delete_share;
 use crate::routes::users::change_password::change_password;
 use crate::routes::users::edit_user::edit_user;
 use crate::routes::users::get_user_info::get_user_info;
@@ -102,5 +103,6 @@ async fn rocket() -> _ {
             reset_token,
             change_password,
             create_share,
+            delete_share,
         ])
 }

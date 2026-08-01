@@ -9,6 +9,16 @@ export interface Thing {
   tb: string,
 }
 
+export interface SharedData {
+  id: Thing,
+  permissions: string[],
+  description?: string,
+  expiration_date?: Date,
+  link_token?: string,
+  share_user_id?: Thing[],
+  link_copied?: boolean,
+}
+
 export interface Folder {
   type: "folder",
   open_dropdown_menu: boolean,
@@ -20,9 +30,10 @@ export interface Folder {
   id: Thing,
   name: string,
   parent_id: Thing,
-  share_id: [object],
+  share_id: Thing[],
   updated_at: Date,
   user_id: Thing,
+  share?: SharedData[],
 }
 
 export interface File {
@@ -35,15 +46,16 @@ export interface File {
   metadata: object,
   name: string,
   parent_id: Thing,
-  share_id: [object],
+  share_id: Thing[],
   size: number,
   tags: string[],
   updated_at: Date,
   user_id: Thing,
   thumbnail: number[][] | null, // change it to bytes
+  share?: SharedData[],
 }
 
-export interface ShareData {
+export interface ShareDataForm {
   share_as: "url" | "user",
   share_permissions_list?: string[],
   share_expiration_date?: any,

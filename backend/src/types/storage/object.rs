@@ -1,6 +1,7 @@
 use rocket::serde::{Deserialize, Serialize};
 use surrealdb::Datetime;
 use surrealdb::sql::{Bytes, Object, Thing};
+use crate::types::storage::share::ShareType;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ObjectType {
@@ -15,6 +16,7 @@ pub struct ObjectType {
     pub updated_at: Option<Datetime>,
     pub user_id: Thing,
     pub thumbnail: Option<Bytes>,
+    pub share: Option<Vec<ShareType>>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

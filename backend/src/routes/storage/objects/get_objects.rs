@@ -13,6 +13,7 @@ use crate::types::storage::object::ObjectType;
 #[derive(Deserialize, Serialize, Debug)]
 pub struct GetObjects {
     pub parent_id: Option<Thing>,
+    pub share_token: Option<String>,
 }
 
 #[post("/storage/get_objects", data = "<data>")]
@@ -20,22 +21,45 @@ pub async fn get_objects (
     db: &State<Arc<Surreal<Any>>>,
     _client: &State<Arc<Client>>,
     data: Json<GetObjects>,
-    auth_token: AuthToken,
+    auth_token: Option<AuthToken>,
 ) -> Result<(Status, Json<Vec<ObjectType>>), (Status, &'static str)> {
-
-    let query = match data.parent_id {
+    let query = match data.share_token {
         Some(_) => {
-            "SELECT * FROM files where user_id = $user_id AND parent_id = $parent_id;"
+            match data.parent_id {
+                Some(_) => {
+                    "" // change later
+                }
+                None => {
+                    "select VALUE file_id.* OMIT share_id from shared where link_token = $share_token"
+                }
+            }
         }
         None => {
-            "SELECT * FROM files where user_id = $user_id AND parent_id.parent_id = none;"
+            match data.parent_id {
+                Some(_) => {
+                    "SELECT *, share_id.*.* as share FROM files where user_id = $user_id AND parent_id = $parent_id;"
+                }
+                None => {
+                    "SELECT *, share_id.*.* as share FROM files where user_id = $user_id AND parent_id.parent_id = none;"
+                }
+            }
+        }
+    };
+
+    let user_id: Option<Thing> = match auth_token {
+        Some(token) => {
+            Some(Thing::from(("users", token.0.sub.as_str())))
+        }
+        None => {
+            None
         }
     };
     
     let mut resp = db
     .query(query)
-    .bind(("user_id", Thing::from(("users", auth_token.0.sub.as_str()))))
+    .bind(("user_id", user_id))
     .bind(("parent_id", data.parent_id.clone()))
+    .bind(("share_token", data.share_token.clone()))
     .await
     .map_err(|e| {
         eprintln!("Failed to delete folder: {}", e);
@@ -52,4 +76,5 @@ pub async fn get_objects (
         }
     };
     Ok((Status::Ok, Json(objects)))
+
 }

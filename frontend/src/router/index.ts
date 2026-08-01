@@ -32,7 +32,7 @@ const router = createRouter({
       component: mainPanelView,
       children: [
         {
-          path: "storage",
+          path: "storage/:token?",
           name: "storage",
           component: fileExplorerView,
         },
