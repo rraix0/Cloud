@@ -36,10 +36,10 @@ pub async fn get_folders (
 
     let query = match data.parent_id {
         Some(_) => {
-            "select * from folders where parent_id = $parent_id and user_id = $user_id"
+            "select *, share_id.*.* as share from folders where parent_id = $parent_id and user_id = $user_id"
         }
         None => {
-            "select * from folders where
+            "select *, share_id.*.* as share from folders where
              parent_id.parent_id = none
              and parent_id != none
              and user_id = $user_id"

@@ -1,6 +1,40 @@
 <script setup lang="ts">
-import { ArrowUpDown,RotateCcw,  CalendarOff, ChevronDown, Link, Link2,CalendarIcon, CircleX, RefreshCcw, Check, Columns3Cog, Plus, Settings, FileText, FileSpreadsheet, FileChartColumnIncreasing, Type, FileImage, FileVideo, FileAudio, FileCode, FileArchive, Box,  FileVideoCamera, Folder, File, ChevronsUp, Menu, Trash, Download, PencilLine, Move, ChevronUp,
-  ChevronRight
+import {
+  ArrowUpDown,
+  RotateCcw,
+  CalendarOff,
+  ChevronDown,
+  Link,
+  Link2,
+  CalendarIcon,
+  CircleX,
+  RefreshCcw,
+  Check,
+  Columns3Cog,
+  Plus,
+  Settings,
+  FileText,
+  FileSpreadsheet,
+  FileChartColumnIncreasing,
+  Type,
+  FileImage,
+  FileVideo,
+  FileAudio,
+  FileCode,
+  FileArchive,
+  Box,
+  FileVideoCamera,
+  Folder,
+  File,
+  ChevronsUp,
+  Menu,
+  Trash,
+  Download,
+  PencilLine,
+  Move,
+  ChevronUp,
+  ChevronRight,
+  ClipboardCheck, Eye, Trash2, Pencil
 } from 'lucide-vue-next'
 
 import { computed, type Ref, ref } from 'vue'
@@ -92,33 +126,32 @@ import { CalendarDate } from '@internationalized/date'
 import type { DateValue } from "@internationalized/date";
 
 
-const share_data =ref<ShareDataForm>( {
+const share_data: ShareDataForm = {
   share_as: 'url',
   share_permissions_list: ['read'],
   share_description: "",
-  share_expiration_date: new CalendarDate(2022,2, 3),
-});
+  share_expiration_date: null,
+};
 
 // DROPDOWN MENU SHARE BUTTON LOGIC
 const getPermission = (item:FolderType | FileType, perm: string):boolean => {
-  if (share_data.value.share_permissions_list && share_data.value.share_permissions_list.includes(perm)) {
+  if (share_data.share_permissions_list && share_data.share_permissions_list.includes(perm)) {
     return true
   } else {
     return false
   }
 }
 const togglePermission = (perm: string) => {
-  if (share_data.value.share_permissions_list) {
-    if (share_data.value.share_permissions_list.includes(perm)) {
-      share_data.value.share_permissions_list = share_data.value.share_permissions_list.filter((x) => x != perm)
+  if (share_data.share_permissions_list) {
+    if (share_data.share_permissions_list.includes(perm)) {
+      share_data.share_permissions_list = share_data.share_permissions_list.filter((x) => x != perm)
     } else {
-      share_data.value.share_permissions_list.push(perm)
+      share_data.share_permissions_list.push(perm)
     }
   } else {
-    share_data.value.share_permissions_list = [perm]
+    share_data.share_permissions_list = [perm]
   }
 }
-
 
 
 </script>
@@ -144,7 +177,120 @@ const togglePermission = (perm: string) => {
     </TableCell>
     <TableCell v-show="storage.headers[3]?.selected">{{ new Date(item.created_at).toLocaleDateString() }}</TableCell>
     <TableCell v-show="storage.headers[4]?.selected">{{  }}</TableCell>
-    <TableCell v-show="storage.headers[5]?.selected">{{ item.share_id }}</TableCell>
+    <TableCell v-show="storage.headers[5]?.selected">
+
+      <div class="flex items-center">
+
+
+        <Dialog v-if="item.share?.length">
+          <DialogTrigger>
+            <Link2 />
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>This file <span class="text-muted-foreground p-1">{{ item.name }}</span> is shared:</DialogTitle>
+              <DialogDescription>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead class="w-[100px]">Description</TableHead>
+                      <TableHead class="w-[100px]">Permissions</TableHead>
+                      <TableHead>Expire at</TableHead>
+                      <TableHead>Method</TableHead>
+                      <TableHead class="text-right"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow v-for="share in item.share">
+                      <TableCell class="font-medium">
+                        {{ share.description }}
+                      </TableCell>
+                      <TableCell class="font-medium">
+                        <div class=" flex gap-1">
+                          <Eye v-if="share.permissions.includes('read')" />
+                          <Pencil v-if="share.permissions.includes('write')" />
+                          <Trash2 v-if="share.permissions.includes('delete')" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span v-if="share.expiration_date">{{ share.expiration_date }}</span>
+                        <span v-else>ー</span>
+                      </TableCell>
+                      <TableCell>
+                        <div class="flex gap-2 items-center">
+                          <Button v-if="share.link_token" variant="outline" @click="storage.copyShareLink(share)">
+                            <Link2 v-if="!share.link_copied" />
+                            <ClipboardCheck v-else />
+                            copy
+                          </Button>
+                        </div>
+
+                      </TableCell>
+
+                      <TableCell>
+                        <div class="w-full flex justify-end items-center gap-2">
+
+                          <!-- EDIT SHARE
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              <PencilLine />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Editing share</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Feature will be available in the future
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction @click="">Update</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          -->
+                          <!-- DELETE SHARE -->
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              <Trash2 class="text-red-500" />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete share?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction class="text-white bg-red-500 hover:bg-red-400" @click="storage.deleteShare(share.id)"><Trash2 class="text-white" /> Delete</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+
+                    </TableRow>
+                  </TableBody>
+                </Table>
+
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose as-child>
+                <Button variant="outline">
+                  Close
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+
+
+    </TableCell>
     <TableCell v-show="storage.headers[6]?.selected" class="h-[45px] p-0 flex justify-center items-center">
 
       <!-- DROPDOWN MENU -->

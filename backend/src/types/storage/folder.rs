@@ -1,6 +1,7 @@
 use rocket::serde::{Deserialize, Serialize};
 use surrealdb::Datetime;
 use surrealdb::sql::{Thing};
+use crate::types::storage::share::ShareType;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Folder {
@@ -11,6 +12,7 @@ pub struct Folder {
     pub share_id: Option<Vec<Thing>>,
     pub updated_at: Option<Datetime>,
     pub user_id: Thing,
+    pub share: Option<Vec<ShareType>>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

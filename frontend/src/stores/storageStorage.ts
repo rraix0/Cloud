@@ -554,7 +554,7 @@ export const useStorageStorage = defineStore('storage', () => {
 
   const deleteShare = (share_id: Thing) => {
 
-    axios.post(import.meta.env.VITE_API_URL + "/share/create_share", {
+    axios.post(import.meta.env.VITE_API_URL + "/share/delete_share", {
         id: share_id
       },
       {

@@ -143,9 +143,6 @@ const togglePermission = (perm: string) => {
   }
 }
 
-async function copyLink(url: string) {
-  await navigator.clipboard.writeText(url);
-}
 
 </script>
 
@@ -289,7 +286,7 @@ async function copyLink(url: string) {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction class="text-white bg-red-500 hover:bg-red-400" @click=""><Trash2 class="text-white" /> Delete</AlertDialogAction>
+                              <AlertDialogAction class="text-white bg-red-500 hover:bg-red-400" @click="storage.deleteShare(share.id)"><Trash2 class="text-white" /> Delete</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>

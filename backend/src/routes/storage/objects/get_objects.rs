@@ -2,6 +2,7 @@ use std::sync::Arc;
 use aws_sdk_s3::Client;
 use rocket::{post, State};
 use rocket::http::Status;
+use rocket::request::Outcome;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::serde::json::Json;
 use surrealdb::engine::any::Any;
@@ -30,11 +31,27 @@ pub async fn get_objects (
                     "" // change later
                 }
                 None => {
-                    "select VALUE file_id.* OMIT share_id from shared where link_token = $share_token"
+                    "{
+
+                        LET $file_id = ((select VALUE file_id from shared where link_token = $share_token).first());
+
+                        if $file_id != NONE {
+                            LET $one_file = select VALUE file_id.* OMIT share_id from shared where link_token = $share_token;
+                            return $one_file;
+                        } else {
+                            LET $folder_id = (select VALUE folder_id from shared where link_token = $share_token).first();
+                            LET $files = select * from files where parent_id = $folder_id;
+                            return $files
+                        };
+
+                    }"
                 }
             }
         }
         None => {
+            if auth_token.is_none() {
+                return Err((Status::Unauthorized, "Token Not Found"));
+            }
             match data.parent_id {
                 Some(_) => {
                     "SELECT *, share_id.*.* as share FROM files where user_id = $user_id AND parent_id = $parent_id;"
@@ -65,6 +82,8 @@ pub async fn get_objects (
         eprintln!("Failed to delete folder: {}", e);
         (Status::NotFound, "Object not found")
     })?;
+
+    println!("{:?}", resp);
 
     let objects:Vec<ObjectType> = match resp.take::<Vec<ObjectType>>(0) {
         Ok(data) => {
