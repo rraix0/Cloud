@@ -216,7 +216,7 @@ const togglePermission = (perm: string) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead class="w-[100px]">Description</TableHead>
+                    <TableHead class="w-[500px]">Description</TableHead>
                     <TableHead class="w-[100px]">Permissions</TableHead>
                     <TableHead>Expire at</TableHead>
                     <TableHead>Method</TableHead>
@@ -225,7 +225,7 @@ const togglePermission = (perm: string) => {
                 </TableHeader>
                 <TableBody>
                   <TableRow v-for="share in item.share">
-                    <TableCell class="font-medium">
+                    <TableCell class="font-medium whitespace-normal break-words">
                       {{ share.description }}
                     </TableCell>
                     <TableCell class="font-medium">

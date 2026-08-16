@@ -411,10 +411,11 @@ export const useStorageStorage = defineStore('storage', () => {
 
   const selectedDownload = async () => { // TODO Repair it later to download as zip
     const file_ids:File[] = files.value.filter((item: File) => item.selected)
-
+    const share_token = route.params.token ? route.params.token : undefined;
     file_ids.forEach((item) => {
       axios.post(import.meta.env.VITE_API_URL + "/storage/get_download_uri", {
           object_id: item.id,
+          share_token: share_token,
         },
         {
           headers: {
