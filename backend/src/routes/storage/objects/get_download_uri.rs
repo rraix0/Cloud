@@ -13,11 +13,14 @@ use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 use crate::guards::auth_type::{AuthToken};
+use crate::routes::storage::share::functions::check_share::check_if_shared;
+use crate::types::share::shared::CheckObjectShare;
 use crate::types::storage::object::ObjectType;
 
 #[derive(Deserialize, Debug)]
 pub struct GetDownloadUri {
     object_id: Thing,
+    share_token: Option<String>,
 }
 
 
@@ -26,12 +29,64 @@ pub async fn get_download_uri (
     db: &State<Arc<Surreal<Any>>>,
     _client: &State<Arc<Client>>,
     data: Json<GetDownloadUri>,
-    auth_token: AuthToken,
+    auth_token: Option<AuthToken>,
 ) -> Result<(Status, String), (Status, &'static str)> {
+        let user_id: Thing = {
+        if let Some(auth_token) = auth_token {
+            Thing::from(("users", auth_token.0.sub.as_str()))
+        } else if let Some(share_token) = data.share_token.clone() {
+            let mut resp = db
+                .query("SELECT VALUE user_id FROM shared WHERE link_token = $shared_token;")
+                .bind(("shared_token", share_token.clone()))
+                .await
+                .map_err(|e| {
+                    eprintln!("Failed to fetch shared data: {}", e);
+                    (Status::NotFound, "Object not found")
+                })?;
+
+            let objects: Vec<Thing> = resp.take(0).map_err(|e| {
+                eprintln!("Failed to parse user: {}", e);
+                (Status::InternalServerError, "Database error while fetching user")
+            })?;
+
+            let result = match objects.len() {
+                1 => objects.into_iter().next().unwrap(),
+                0 => return Err((Status::NotFound, "User not found")),
+                _ => return Err((Status::InternalServerError, "Multiple users found")),
+            };
+
+            let share_result = check_if_shared(
+                &db,
+                CheckObjectShare {
+                    link_token: Some(share_token),
+                    share_user_id: None,
+                    share_id: None,
+                    object_id: Some(data.object_id.clone()),
+                    folder_id: None
+                }
+            ).await;
+            println!("SHARE CHECK: {:?}", share_result);
+            if let Err(err) = share_result {
+                return Err((Status::BadRequest, err));
+            }
+
+
+
+            result
+        } else {
+            return Err((Status::BadRequest, "No credentials provided"));
+        }
+    };
+
+
+
+
+
+
 
     let mut resp = db
         .query("SELECT * FROM files where user_id = $user_id AND id = $id")
-        .bind(("user_id", Thing::from(("users", auth_token.0.sub.clone().as_str()))))
+        .bind(("user_id", user_id.clone()))
         .bind(("id", data.object_id.clone()))
         .await
         .map_err(|e| {
@@ -72,10 +127,12 @@ pub async fn get_download_uri (
     let client = Client::from_conf(s3_config);
     // END
 
+    println!("{}/{}", user_id.id.to_raw(), data.object_id.id.to_raw().clone());
+
     let resp = client
         .get_object()
         .bucket(env::var("AWS_BUCKET").unwrap())
-        .key(format!("{}/{}", auth_token.0.sub.clone(), data.object_id.id.to_raw().clone()))
+        .key(format!("{}/{}", user_id.id.to_raw(), data.object_id.id.to_raw().clone()))
         .response_content_disposition(&format!("attachment; filename={:#?}", file_name))
         .presigned(
             PresigningConfig::builder()

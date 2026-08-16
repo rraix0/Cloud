@@ -143,6 +143,7 @@ export const useStorageStorage = defineStore('storage', () => {
     folders.value = [];
     axios.post(import.meta.env.VITE_API_URL + "/storage/get_folders", {
         parent_id: parent_id,
+        share_token: share_token,
       },
     {
       headers: {
@@ -209,8 +210,10 @@ export const useStorageStorage = defineStore('storage', () => {
   };
 
   const getDownloadUri = async (object_id: object) => {
+    const share_token = route.params.token ? route.params.token : undefined;
     axios.post(import.meta.env.VITE_API_URL + "/storage/get_download_uri", {
         object_id: object_id,
+        share_token: share_token,
       },
       {
         headers: {
@@ -585,10 +588,7 @@ export const useStorageStorage = defineStore('storage', () => {
 
   }
 
-
-  if (!share_token) {
     getFolders();
-  }
     getFiles();
 
 

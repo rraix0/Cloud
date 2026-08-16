@@ -16,6 +16,8 @@ pub struct Shared {
     pub permissions: Vec<String>,
     pub share_user_id: Option<Thing>,
     pub user_id: Thing,
+    // for selection of file parent
+    pub parent_id: Option<Thing>,
 }
 
 pub static PERMISSIONS: Lazy<RwLock<Arc<Vec<String>>>> = Lazy::new(|| {
@@ -26,3 +28,13 @@ pub static PERMISSIONS: Lazy<RwLock<Arc<Vec<String>>>> = Lazy::new(|| {
         "recursive".to_string(),
     ]))
 });
+
+#[derive(Debug, Clone)]
+pub struct CheckObjectShare {
+    pub link_token: Option<String>,
+    pub share_user_id: Option<Thing>,
+    pub share_id: Option<Thing>,
+    pub object_id: Option<Thing>,
+    pub folder_id: Option<Thing>,
+}
+

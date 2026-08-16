@@ -9,6 +9,8 @@ use surrealdb::engine::any::Any;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 use crate::guards::auth_type::{AuthToken};
+use crate::routes::storage::share::functions::check_share::check_if_shared;
+use crate::types::share::shared::CheckObjectShare;
 use crate::types::storage::object::ObjectType;
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -24,15 +26,42 @@ pub async fn get_objects (
     data: Json<GetObjects>,
     auth_token: Option<AuthToken>,
 ) -> Result<(Status, Json<Vec<ObjectType>>), (Status, &'static str)> {
-    let query = match data.share_token {
-        Some(_) => {
+    /*
+let x = check_if_shared(db, CheckObjectShare {
+    link_token: data.share_token.clone(),
+    share_user_id: None,
+    share_id: None,
+    object_id: None,
+    folder_id: data.parent_id.clone(),
+}).await;
+
+    println!("{:?}", x);
+
+     */
+
+
+    let query = match data.share_token.clone() {
+        Some(share_token) => {
             match data.parent_id {
                 Some(_) => {
-                    "" // change later
+                    let x = check_if_shared(
+                        &db,
+                        CheckObjectShare {
+                            link_token: Some(share_token),
+                            share_user_id: None,
+                            share_id: None,
+                            object_id: None,
+                            folder_id: data.parent_id.clone()
+                        }
+                    ).await;
+                    println!("SHARE CHECK: {:?}", x);
+                    if let Err(err) = x {
+                        return Err((Status::BadRequest, err));
+                    }
+                    "SELECT * omit share_id FROM files where parent_id = $parent_id;"
                 }
                 None => {
                     "{
-
                         LET $file_id = ((select VALUE file_id from shared where link_token = $share_token).first());
 
                         if $file_id != NONE {
@@ -40,7 +69,7 @@ pub async fn get_objects (
                             return $one_file;
                         } else {
                             LET $folder_id = (select VALUE folder_id from shared where link_token = $share_token).first();
-                            LET $files = select * from files where parent_id = $folder_id;
+                            LET $files = select * omit share_id from files where parent_id = $folder_id;
                             return $files
                         };
 
@@ -82,8 +111,6 @@ pub async fn get_objects (
         eprintln!("Failed to delete folder: {}", e);
         (Status::NotFound, "Object not found")
     })?;
-
-    println!("{:?}", resp);
 
     let objects:Vec<ObjectType> = match resp.take::<Vec<ObjectType>>(0) {
         Ok(data) => {

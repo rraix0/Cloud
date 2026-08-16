@@ -24,6 +24,7 @@ pub struct CreateFolder {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct GetFolders {
     pub parent_id: Option<Thing>,
+    pub share_token: Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
